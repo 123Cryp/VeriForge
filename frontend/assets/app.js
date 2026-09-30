@@ -190,6 +190,11 @@
       var s = DEMO.scenarios[i];
       certBox.value = s.certificate_text; bundleBox.value = JSON.stringify(s.evidence_bundle); hashBox.value = s.certificate_hash; sync(); out.replaceChildren();
     }
+    function loadLive() {
+      var L = window.VF_LIVE_EXAMPLE;
+      if (!L) return;
+      certBox.value = L.certificate_text; bundleBox.value = JSON.stringify(L.evidence_bundle); hashBox.value = L.certificate_hash; sync(); out.replaceChildren();
+    }
     function tamper(kind) {
       var cert = parse(certBox.value);
       if (!cert) return;
@@ -214,7 +219,8 @@
       el("p", { class: "muted" }, "Runs entirely in this page (a second implementation of the hashing and derivation rules, independent of the contract). It recomputes every hash, re-derives every per-requirement result and the final result from the embedded role outputs, and — with the evidence bundle — re-checks every quote against the frozen bytes."),
       el("div", { class: "row" },
         el("button", { class: "btn", id: "loadv", onclick: function () { load(0); } }, "Load demo: vulnerable PR"),
-        el("button", { class: "btn", id: "loadf", onclick: function () { load(1); } }, "Load demo: fixed PR")),
+        el("button", { class: "btn", id: "loadf", onclick: function () { load(1); } }, "Load demo: fixed PR"),
+        el("button", { class: "btn", id: "loadlive", onclick: loadLive }, "Load live Studio certificate")),
       el("p", {}), certBox, el("p", {}), bundleBox, el("p", {}), hashBox, el("p", {}),
       el("div", { class: "row" }, el("button", { class: "btn primary", id: "verifybtn", onclick: run }, "Verify"),
         el("span", { class: "muted" }, "Try to break it:"),
@@ -282,7 +288,7 @@
     var list = el("div", { id: "livelist" }), detail = el("div", { id: "livedetail" });
     var wallet = el("span", { class: "muted", id: "walletstatus" }, LIVE.account ? LIVE.account : "no wallet connected");
     view.appendChild(panel(el("h2", {}, "Live mode (GenLayer Studio)"),
-      el("p", { class: "notice muted" }, "This mode talks to a deployed contract through genlayer-js (loaded on demand). It has NOT been exercised against a live deployment in this repository’s test runs; see docs/DEPLOYMENT.md and docs/FINAL_SECURITY_REVIEW.md. The recorded demo and the verifier work without it."),
+      el("p", { class: "notice muted" }, "This mode talks to a deployed contract through genlayer-js (loaded on demand). The contract itself was run end to end on GenLayer Studio (see examples/live/ and docs/FINAL_SECURITY_REVIEW.md), but this page’s Live tab is only tested without a network. The recorded demo and the verifier work without it."),
       addr, el("p", {}),
       el("div", { class: "row" },
         el("button", { class: "btn primary", id: "loadlist", onclick: async function () {
