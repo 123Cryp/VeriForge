@@ -215,11 +215,23 @@ def _():
     with_page(go, use_http=False)
 
 
+@test("verify tab accepts the live Studio certificate and rejects a tampered one")
+def _():
+    def go(page):
+        tab(page, "verify")
+        page.click("#loadlive")
+        page.click("#verifybtn")
+        assert "CERTIFICATE VALID" in page.inner_text("#vout")
+        page.click("#t-flip")
+        assert "CERTIFICATE INVALID" in page.inner_text("#vout")
+    with_page(go, use_http=False)
+
+
 @test("live mode renders without a wallet and refuses invalid addresses (no network needed)")
 def _():
     def go(page):
         tab(page, "live")
-        assert "NOT been exercised against a live deployment" in page.inner_text("#view")
+        assert "run end to end on GenLayer Studio" in page.inner_text("#view")
         page.fill("#addr", "0x123")
         page.click("#loadlist")
         assert "valid contract address" in page.inner_text("#livelog")
