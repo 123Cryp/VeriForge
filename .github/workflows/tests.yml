@@ -1,1 +1,47 @@
-.
+name: tests
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+      - name: Deploy artifact is current and equivalent
+        run: python3 tools/build_deploy.py --check
+      - name: Generated assets are current
+        run: |
+          python3 tools/make_fixtures.py --check
+          python3 tools/run_demo.py --check
+          python3 tools/security_demo.py --check
+      - name: Unit tests (source)
+        run: python3 tests/test_veriforge.py
+      - name: Adversarial tests
+        run: python3 tests/test_adversarial.py
+      - name: Certificate tests (Python and JavaScript verifiers)
+        run: python3 tests/test_certificate.py
+      - name: Frontend tests (headless Chromium)
+        run: python3 tests/test_frontend.py
+      - name: Fuzz
+        run: python3 tests/test_fuzz.py
+      - name: Mutation tests
+        run: python3 tests/mutation_test.py
+      - name: All suites against the deploy artifact
+        env:
+          VF_MODULE: veriforge_deploy
+          FUZZ_RUNS: "300"
+        run: |
+          python3 tests/test_veriforge.py
+          python3 tests/test_adversarial.py
+          python3 tests/test_certificate.py
+          python3 tests/test_fuzz.py
