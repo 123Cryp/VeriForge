@@ -1,0 +1,1299 @@
+{
+ "protocol": "VeriForge",
+ "protocol_version": "1.0",
+ "recording": "Local execution of contracts/veriforge.py against tests/genlayer_stub.py with scripted models; not a live GenLayer run.",
+ "scenarios": [
+  {
+   "case": {
+    "challenges": [
+     {
+      "challenge_id": "C1",
+      "challenger": "0x00000000000000000000000000000000000000C3",
+      "created_at": "2026-01-01T00:00:00+00:00",
+      "final_result": "INSECURE",
+      "kind": "VERDICT",
+      "original_result": "INSECURE",
+      "rationale": "withdrawTo() is exposed without onlyAuthorized; please re-run the analysis.",
+      "reanalysis": "{\"attacker\":{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":{\"capability\":\"an account that is not authorized, holding a deposited balance\",\"entry_point\":\"withdrawTo\",\"evidence\":[{\"evidence_id\":\"E3\",\"quote\":\"function withdrawTo(address payable to, uint256 amount) external {\"},{\"evidence_id\":\"E3\",\"quote\":\"_send(to, amount);\"}],\"hypothesis_id\":\"A5\",\"id\":\"CE-T3\",\"missing_protection\":\"authorization check (onlyAuthorized) on withdrawTo()\",\"path\":[\"withdrawTo\",\"_send\"],\"threat_id\":\"T3\"},\"outcome\":\"COUNTEREXAMPLE\",\"reason\":\"withdrawTo() reaches _send() with no authorization check\"}},\"auditor\":{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the quoted code has no authorization on withdrawTo()\",\"ruling\":\"ATTACK_UPHELD\"}},\"defender\":{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"function withdraw(uint256 amount) external onlyAuthorized {\"}],\"hypothesis_id\":\"A5\"},{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"require(balances[msg.sender] >= amount, \\\"insufficient balance\\\");\"}],\"hypothesis_id\":\"A6\"}]}}}",
+      "reanalysis_result": "INSECURE",
+      "resolution": "CONFIRMED",
+      "target": "T3",
+      "threat_id": "T3"
+     }
+    ],
+    "hypotheses": [
+     {
+      "capability": "an account that is not authorized",
+      "description": "Call withdraw() directly without being authorized",
+      "entry_point": "withdraw",
+      "evidence_refs": [
+       "E1",
+       "E3"
+      ],
+      "id": "A1",
+      "threat_id": "T1"
+     },
+     {
+      "capability": "an account that is not the owner",
+      "description": "Grant itself authorization through authorize()",
+      "entry_point": "authorize",
+      "evidence_refs": [
+       "E1",
+       "E3"
+      ],
+      "id": "A2",
+      "threat_id": "T1"
+     },
+     {
+      "capability": "an authorized account with a small balance",
+      "description": "Withdraw more than the recorded balance through withdraw()",
+      "entry_point": "withdraw",
+      "evidence_refs": [
+       "E1",
+       "E3"
+      ],
+      "id": "A3",
+      "threat_id": "T2"
+     },
+     {
+      "capability": "any account with a balance",
+      "description": "Underflow the balance inside the shared _send helper",
+      "entry_point": "_send",
+      "evidence_refs": [
+       "E1",
+       "E3"
+      ],
+      "id": "A4",
+      "threat_id": "T2"
+     },
+     {
+      "capability": "an account that is not authorized",
+      "description": "Reach the transfer through the separate withdrawTo() entry point",
+      "entry_point": "withdrawTo",
+      "evidence_refs": [
+       "E1",
+       "E3"
+      ],
+      "id": "A5",
+      "threat_id": "T3"
+     },
+     {
+      "capability": "an account that is not authorized",
+      "description": "Reach _send from another public function",
+      "entry_point": "_send",
+      "evidence_refs": [
+       "E1",
+       "E3"
+      ],
+      "id": "A6",
+      "threat_id": "T3"
+     },
+     {
+      "capability": "a maintainer who removes the guard",
+      "description": "The test never reaches the unauthorized path",
+      "entry_point": "testWithdrawRejectsUnauthorizedCaller",
+      "evidence_refs": [
+       "E2",
+       "E4"
+      ],
+      "id": "A7",
+      "threat_id": "T4"
+     },
+     {
+      "capability": "a maintainer who removes the guard",
+      "description": "Remove the guard without any test failing",
+      "entry_point": "withdraw",
+      "evidence_refs": [
+       "E2",
+       "E4"
+      ],
+      "id": "A8",
+      "threat_id": "T4"
+     }
+    ],
+    "threats": [
+     {
+      "attacker": "{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":null,\"outcome\":\"NONE_FOUND\",\"reason\":\"no valid counterexample exists in the evidence\"}}",
+      "auditor": "{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the defence is supported by the quoted code\",\"ruling\":\"DEFENSE_UPHELD\"}}",
+      "challenge_count": 0,
+      "defender": "{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"function withdraw(uint256 amount) external onlyAuthorized {\"}],\"hypothesis_id\":\"A1\"},{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"require(msg.sender == owner, \\\"not owner\\\");\"}],\"hypothesis_id\":\"A2\"}]}}",
+      "result": "SECURE",
+      "result_reason": "DEFENSE_UPHELD",
+      "text": "Every successful withdrawal through withdraw() is restricted to callers that the vault has authorized.",
+      "text_hash": "06139b882909dc3fc48ea54fbe173cd8d8491735d6ccac9711258eea8693ce82",
+      "threat_id": "T1"
+     },
+     {
+      "attacker": "{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":null,\"outcome\":\"NONE_FOUND\",\"reason\":\"no valid counterexample exists in the evidence\"}}",
+      "auditor": "{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the defence is supported by the quoted code\",\"ruling\":\"DEFENSE_UPHELD\"}}",
+      "challenge_count": 0,
+      "defender": "{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"require(balances[msg.sender] >= amount, \\\"insufficient balance\\\");\"}],\"hypothesis_id\":\"A3\"},{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"balances[msg.sender] -= amount;\"}],\"hypothesis_id\":\"A4\"}]}}",
+      "result": "SECURE",
+      "result_reason": "DEFENSE_UPHELD",
+      "text": "A withdrawal can never transfer more than the caller's recorded balance.",
+      "text_hash": "bbdb2ae908a383954980ff6e5126f11e25f8962dd696e8f11cfb5ac9a58216df",
+      "threat_id": "T2"
+     },
+     {
+      "attacker": "{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":{\"capability\":\"an account that is not authorized, holding a deposited balance\",\"entry_point\":\"withdrawTo\",\"evidence\":[{\"evidence_id\":\"E3\",\"quote\":\"function withdrawTo(address payable to, uint256 amount) external {\"},{\"evidence_id\":\"E3\",\"quote\":\"_send(to, amount);\"}],\"hypothesis_id\":\"A5\",\"id\":\"CE-T3\",\"missing_protection\":\"authorization check (onlyAuthorized) on withdrawTo()\",\"path\":[\"withdrawTo\",\"_send\"],\"threat_id\":\"T3\"},\"outcome\":\"COUNTEREXAMPLE\",\"reason\":\"withdrawTo() reaches _send() with no authorization check\"}}",
+      "auditor": "{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the quoted code has no authorization on withdrawTo()\",\"ruling\":\"ATTACK_UPHELD\"}}",
+      "challenge_count": 1,
+      "defender": "{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"function withdraw(uint256 amount) external onlyAuthorized {\"}],\"hypothesis_id\":\"A5\"},{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"require(balances[msg.sender] >= amount, \\\"insufficient balance\\\");\"}],\"hypothesis_id\":\"A6\"}]}}",
+      "result": "INSECURE",
+      "result_reason": "ATTACK_UPHELD",
+      "text": "No other public or external entry point lets a caller without authorization withdraw funds.",
+      "text_hash": "ce0a9b040d534254bc56a7f5683b3e67a0840627703bf2025f4988d0f6ed51ca",
+      "threat_id": "T3"
+     },
+     {
+      "attacker": "{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":null,\"outcome\":\"NONE_FOUND\",\"reason\":\"no valid counterexample exists in the evidence\"}}",
+      "auditor": "{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the defence is supported by the quoted code\",\"ruling\":\"DEFENSE_UPHELD\"}}",
+      "challenge_count": 0,
+      "defender": "{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E4\",\"quote\":\"vm.expectRevert(\\\"unauthorized\\\");\"}],\"hypothesis_id\":\"A7\"},{\"citations\":[{\"evidence_id\":\"E4\",\"quote\":\"vault.withdraw(1 ether);\"}],\"hypothesis_id\":\"A8\"}]}}",
+      "result": "SECURE",
+      "result_reason": "DEFENSE_UPHELD",
+      "text": "The change includes a regression test that fails if an unauthorized caller can call withdraw().",
+      "text_hash": "2c507bc8b60fc9a6baf4ccc013fefaa2a0f21cfde9d2bfb4f7b6244caad2845c",
+      "threat_id": "T4"
+     }
+    ],
+    "verification": {
+     "aggregated_at": "2026-01-01T00:00:00+00:00",
+     "base_commit": "9f1c3a5e7b2d4c6a8e0f1a3b5c7d9e1f2a4b6c8d",
+     "certificate_hash": "4952dbf4e4a8a155ee1e784760ea070dd99143ce1cd20ddf8dde1d5111cb481c",
+     "challenge_deadline": "2026-01-03T00:00:00+00:00",
+     "challenge_ids": [
+      "C1"
+     ],
+     "claim_hash": "c8201124eef486733ab1459aa43a68a43bae992c9225a08b814addc9f32fa623",
+     "consensus_json": "{\"role_origins\":{\"attacker\":{\"CONSENSUS\":4},\"auditor\":{\"CONSENSUS\":4},\"defender\":{\"CONSENSUS\":4}},\"rule\":\"exact-verdict consensus per role; per-requirement result derived deterministically\",\"threat_count\":4}",
+     "created_at": "2026-01-01T00:00:00+00:00",
+     "diff_hash": "04441e452d8fe86f639f85e2a6806b1c7ab21df2f5943be9d65bf784487fbf48",
+     "evidence_complete": true,
+     "evidence_notes": "{\"binary\":0,\"changed_files\":2,\"deleted\":0,\"head_files_frozen\":2,\"omitted\":[],\"unavailable\":[]}",
+     "evidence_root": "7a5dcb65ba6cab852919a9588b883c894b438d811148b2468f2237024c8f0298",
+     "final_result": "INSECURE",
+     "finalized_at": "2026-01-03T00:00:01+00:00",
+     "frozen_at": "2026-01-01T00:00:00+00:00",
+     "head_commit": "c4a8e2f6b0d3971a5e8c2f6b0d4a7913e5c8b2f1",
+     "hypotheses_hash": "54cbda0b80bb0185b3d7dfc09613778307c2038d913aead7af9ba380b377cc3d",
+     "hypothesis_ids": [
+      "A1",
+      "A2",
+      "A3",
+      "A4",
+      "A5",
+      "A6",
+      "A7",
+      "A8"
+     ],
+     "item_ids": [
+      "E1",
+      "E2",
+      "E3",
+      "E4"
+     ],
+     "ref": "PR#7",
+     "ref_kind": "pr",
+     "repository": "https://github.com/example/vault",
+     "result_note": "",
+     "security_claim": "This PR fixes unauthorized withdrawal: only authorized users can withdraw funds from the Vault.",
+     "stage_deadline": "",
+     "status": "FINALIZED",
+     "submitter": "0x00000000000000000000000000000000000000A1",
+     "termination_reason": "",
+     "threat_ids": [
+      "T1",
+      "T2",
+      "T3",
+      "T4"
+     ],
+     "threats_hash": "949216f5a5fa0696554d5f22aa5b04f41ebc57fb68e71dee79e6e177158ea302",
+     "verification_id": "vf_0"
+    }
+   },
+   "certificate_hash": "4952dbf4e4a8a155ee1e784760ea070dd99143ce1cd20ddf8dde1d5111cb481c",
+   "certificate_text": "{\"aggregated_at\":\"2026-01-01T00:00:00+00:00\",\"analyses\":{\"attacker_hash\":\"c035f8c6106f1a8cf9f3d393128ab688c8643f7dce4d0700ef8ad4ea79240c0e\",\"auditor_hash\":\"1fadfeee611887f3152d0df03b9c610dda591886971e604f6c7c2bb380a1a2a8\",\"defender_hash\":\"9bd419b2aa6c32dee26b6ea8d3789387596dbaa979d25bb0934ed955ef297581\"},\"attack_hypotheses\":[{\"capability\":\"an account that is not authorized\",\"description\":\"Call withdraw() directly without being authorized\",\"entry_point\":\"withdraw\",\"evidence_refs\":[\"E1\",\"E3\"],\"hash\":\"a78fd533a2f6fab43bb46dc7f9e62d89f5164f2ba72cccd54435c03cf133255c\",\"id\":\"A1\",\"threat_id\":\"T1\"},{\"capability\":\"an account that is not the owner\",\"description\":\"Grant itself authorization through authorize()\",\"entry_point\":\"authorize\",\"evidence_refs\":[\"E1\",\"E3\"],\"hash\":\"ea629b5fd178df9c0996b87266a7e851448ad21d4941133a245d2ea3364ca0b3\",\"id\":\"A2\",\"threat_id\":\"T1\"},{\"capability\":\"an authorized account with a small balance\",\"description\":\"Withdraw more than the recorded balance through withdraw()\",\"entry_point\":\"withdraw\",\"evidence_refs\":[\"E1\",\"E3\"],\"hash\":\"37039b48f386ead6117e756ee0fce656d1ac16e0de8f3a94c19b2f90399453d8\",\"id\":\"A3\",\"threat_id\":\"T2\"},{\"capability\":\"any account with a balance\",\"description\":\"Underflow the balance inside the shared _send helper\",\"entry_point\":\"_send\",\"evidence_refs\":[\"E1\",\"E3\"],\"hash\":\"78c786b2d414655cdb411ef59674ef57d0bbe151143c0e2af800d1eefc474c28\",\"id\":\"A4\",\"threat_id\":\"T2\"},{\"capability\":\"an account that is not authorized\",\"description\":\"Reach the transfer through the separate withdrawTo() entry point\",\"entry_point\":\"withdrawTo\",\"evidence_refs\":[\"E1\",\"E3\"],\"hash\":\"6bb6ae87e50faad608120c8c18fe29ea9cf782d830d34f1e97293a250490b5d4\",\"id\":\"A5\",\"threat_id\":\"T3\"},{\"capability\":\"an account that is not authorized\",\"description\":\"Reach _send from another public function\",\"entry_point\":\"_send\",\"evidence_refs\":[\"E1\",\"E3\"],\"hash\":\"156e16d180e00ce8411bca7e114dd5b39426dbb1814b43d649c0c28dfc9e6bf8\",\"id\":\"A6\",\"threat_id\":\"T3\"},{\"capability\":\"a maintainer who removes the guard\",\"description\":\"The test never reaches the unauthorized path\",\"entry_point\":\"testWithdrawRejectsUnauthorizedCaller\",\"evidence_refs\":[\"E2\",\"E4\"],\"hash\":\"52b8280add55ed15a411c80f30a1de5b0595b34f7d30868dce82aceab9ab4fa4\",\"id\":\"A7\",\"threat_id\":\"T4\"},{\"capability\":\"a maintainer who removes the guard\",\"description\":\"Remove the guard without any test failing\",\"entry_point\":\"withdraw\",\"evidence_refs\":[\"E2\",\"E4\"],\"hash\":\"e98cbc31bd66f61f46f260cfb496634148a88ca45d166e8ff1472644898c327a\",\"id\":\"A8\",\"threat_id\":\"T4\"}],\"attack_hypotheses_hash\":\"54cbda0b80bb0185b3d7dfc09613778307c2038d913aead7af9ba380b377cc3d\",\"base_commit\":\"9f1c3a5e7b2d4c6a8e0f1a3b5c7d9e1f2a4b6c8d\",\"certificate_hash\":\"4952dbf4e4a8a155ee1e784760ea070dd99143ce1cd20ddf8dde1d5111cb481c\",\"challenge_status\":\"RESOLVED\",\"challenges\":[{\"challenge_id\":\"C1\",\"challenger\":\"0x00000000000000000000000000000000000000C3\",\"created_at\":\"2026-01-01T00:00:00+00:00\",\"final_result\":\"INSECURE\",\"kind\":\"VERDICT\",\"original_result\":\"INSECURE\",\"rationale\":\"withdrawTo() is exposed without onlyAuthorized; please re-run the analysis.\",\"reanalysis\":{\"attacker\":{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":{\"capability\":\"an account that is not authorized, holding a deposited balance\",\"entry_point\":\"withdrawTo\",\"evidence\":[{\"evidence_id\":\"E3\",\"quote\":\"function withdrawTo(address payable to, uint256 amount) external {\"},{\"evidence_id\":\"E3\",\"quote\":\"_send(to, amount);\"}],\"hypothesis_id\":\"A5\",\"id\":\"CE-T3\",\"missing_protection\":\"authorization check (onlyAuthorized) on withdrawTo()\",\"path\":[\"withdrawTo\",\"_send\"],\"threat_id\":\"T3\"},\"outcome\":\"COUNTEREXAMPLE\",\"reason\":\"withdrawTo() reaches _send() with no authorization check\"}},\"auditor\":{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the quoted code has no authorization on withdrawTo()\",\"ruling\":\"ATTACK_UPHELD\"}},\"defender\":{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"function withdraw(uint256 amount) external onlyAuthorized {\"}],\"hypothesis_id\":\"A5\"},{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"require(balances[msg.sender] >= amount, \\\"insufficient balance\\\");\"}],\"hypothesis_id\":\"A6\"}]}}},\"reanalysis_hash\":\"59ea232865c8b0b5c60c388d2cba65bd98204fc8f821356c7524d6d345ed2322\",\"reanalysis_result\":\"INSECURE\",\"resolution\":\"CONFIRMED\",\"target\":\"T3\",\"threat_id\":\"T3\"}],\"claim_hash\":\"c8201124eef486733ab1459aa43a68a43bae992c9225a08b814addc9f32fa623\",\"consensus_metadata\":{\"role_origins\":{\"attacker\":{\"CONSENSUS\":4},\"auditor\":{\"CONSENSUS\":4},\"defender\":{\"CONSENSUS\":4}},\"rule\":\"exact-verdict consensus per role; per-requirement result derived deterministically\",\"threat_count\":4},\"counterexamples\":[{\"counterexample\":{\"capability\":\"an account that is not authorized, holding a deposited balance\",\"entry_point\":\"withdrawTo\",\"evidence\":[{\"evidence_id\":\"E3\",\"quote\":\"function withdrawTo(address payable to, uint256 amount) external {\"},{\"evidence_id\":\"E3\",\"quote\":\"_send(to, amount);\"}],\"hypothesis_id\":\"A5\",\"id\":\"CE-T3\",\"missing_protection\":\"authorization check (onlyAuthorized) on withdrawTo()\",\"path\":[\"withdrawTo\",\"_send\"],\"threat_id\":\"T3\"},\"evidence_hashes\":[{\"content_hash\":\"820ca9b05e68762886fede11b8f4da624b91ae3cf7a50498313a80e993c02c2a\",\"evidence_id\":\"E3\"}],\"hash\":\"b5c8460f2a09db4862b63b89f7275b9cbcbdd89ab0ba77390b5f8ae57e38a005\",\"id\":\"CE-T3\",\"threat_id\":\"T3\"}],\"counterexamples_hash\":\"a040b41f6f635bfddef8e960dd48927e0a322b7439970a1dff2cd8d58e0c5255\",\"evidence\":{\"complete\":true,\"diff_ends_with_newline\":true,\"diff_hash\":\"04441e452d8fe86f639f85e2a6806b1c7ab21df2f5943be9d65bf784487fbf48\",\"items\":[{\"content_hash\":\"53413ebc4b202792caf3133f18a256dbec0d41852caa2f3c934e933cf12a5aa6\",\"file_path\":\"contracts/Vault.sol\",\"item_id\":\"E1\",\"length\":709,\"source_type\":\"diff_file\"},{\"content_hash\":\"b9facb0cd83b05a69b30b9a45ed224b905512e3319eaf726e01ca14aa7621287\",\"file_path\":\"test/Vault.t.sol\",\"item_id\":\"E2\",\"length\":720,\"source_type\":\"diff_file\"},{\"content_hash\":\"820ca9b05e68762886fede11b8f4da624b91ae3cf7a50498313a80e993c02c2a\",\"file_path\":\"contracts/Vault.sol\",\"item_id\":\"E3\",\"length\":1313,\"source_type\":\"head_file\"},{\"content_hash\":\"4aa858cd7905f15ef8b161dcc0d673f6cc5f07209c0caa2d1f5162598b76bff5\",\"file_path\":\"test/Vault.t.sol\",\"item_id\":\"E4\",\"length\":551,\"source_type\":\"head_file\"}],\"notes\":{\"binary\":0,\"changed_files\":2,\"deleted\":0,\"head_files_frozen\":2,\"omitted\":[],\"unavailable\":[]},\"root\":\"7a5dcb65ba6cab852919a9588b883c894b438d811148b2468f2237024c8f0298\"},\"final_result\":\"INSECURE\",\"finalized_at\":\"2026-01-03T00:00:01+00:00\",\"frozen_at\":\"2026-01-01T00:00:00+00:00\",\"head_commit\":\"c4a8e2f6b0d3971a5e8c2f6b0d4a7913e5c8b2f1\",\"per_requirement_results\":[{\"attacker\":{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":null,\"outcome\":\"NONE_FOUND\",\"reason\":\"no valid counterexample exists in the evidence\"}},\"auditor\":{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the defence is supported by the quoted code\",\"ruling\":\"DEFENSE_UPHELD\"}},\"challenged\":false,\"counterexample_id\":\"\",\"defender\":{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"function withdraw(uint256 amount) external onlyAuthorized {\"}],\"hypothesis_id\":\"A1\"},{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"require(msg.sender == owner, \\\"not owner\\\");\"}],\"hypothesis_id\":\"A2\"}]}},\"derived_result\":\"SECURE\",\"reason\":\"DEFENSE_UPHELD\",\"result\":\"SECURE\",\"threat_id\":\"T1\"},{\"attacker\":{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":null,\"outcome\":\"NONE_FOUND\",\"reason\":\"no valid counterexample exists in the evidence\"}},\"auditor\":{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the defence is supported by the quoted code\",\"ruling\":\"DEFENSE_UPHELD\"}},\"challenged\":false,\"counterexample_id\":\"\",\"defender\":{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"require(balances[msg.sender] >= amount, \\\"insufficient balance\\\");\"}],\"hypothesis_id\":\"A3\"},{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"balances[msg.sender] -= amount;\"}],\"hypothesis_id\":\"A4\"}]}},\"derived_result\":\"SECURE\",\"reason\":\"DEFENSE_UPHELD\",\"result\":\"SECURE\",\"threat_id\":\"T2\"},{\"attacker\":{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":{\"capability\":\"an account that is not authorized, holding a deposited balance\",\"entry_point\":\"withdrawTo\",\"evidence\":[{\"evidence_id\":\"E3\",\"quote\":\"function withdrawTo(address payable to, uint256 amount) external {\"},{\"evidence_id\":\"E3\",\"quote\":\"_send(to, amount);\"}],\"hypothesis_id\":\"A5\",\"id\":\"CE-T3\",\"missing_protection\":\"authorization check (onlyAuthorized) on withdrawTo()\",\"path\":[\"withdrawTo\",\"_send\"],\"threat_id\":\"T3\"},\"outcome\":\"COUNTEREXAMPLE\",\"reason\":\"withdrawTo() reaches _send() with no authorization check\"}},\"auditor\":{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the quoted code has no authorization on withdrawTo()\",\"ruling\":\"ATTACK_UPHELD\"}},\"challenged\":true,\"counterexample_id\":\"CE-T3\",\"defender\":{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"function withdraw(uint256 amount) external onlyAuthorized {\"}],\"hypothesis_id\":\"A5\"},{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"require(balances[msg.sender] >= amount, \\\"insufficient balance\\\");\"}],\"hypothesis_id\":\"A6\"}]}},\"derived_result\":\"INSECURE\",\"reason\":\"ATTACK_UPHELD\",\"result\":\"INSECURE\",\"threat_id\":\"T3\"},{\"attacker\":{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":null,\"outcome\":\"NONE_FOUND\",\"reason\":\"no valid counterexample exists in the evidence\"}},\"auditor\":{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the defence is supported by the quoted code\",\"ruling\":\"DEFENSE_UPHELD\"}},\"challenged\":false,\"counterexample_id\":\"\",\"defender\":{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E4\",\"quote\":\"vm.expectRevert(\\\"unauthorized\\\");\"}],\"hypothesis_id\":\"A7\"},{\"citations\":[{\"evidence_id\":\"E4\",\"quote\":\"vault.withdraw(1 ether);\"}],\"hypothesis_id\":\"A8\"}]}},\"derived_result\":\"SECURE\",\"reason\":\"DEFENSE_UPHELD\",\"result\":\"SECURE\",\"threat_id\":\"T4\"}],\"protocol\":\"VeriForge\",\"protocol_version\":\"1.0\",\"ref\":\"PR#7\",\"ref_kind\":\"pr\",\"repository\":\"https://github.com/example/vault\",\"result_note\":\"\",\"security_claim\":\"This PR fixes unauthorized withdrawal: only authorized users can withdraw funds from the Vault.\",\"statement\":\"A SECURE result means that the defined security claim survived the protocol's evidence and adversarial verification process. It does not prove that the software contains no vulnerabilities.\",\"threat_requirements\":[{\"hash\":\"06139b882909dc3fc48ea54fbe173cd8d8491735d6ccac9711258eea8693ce82\",\"id\":\"T1\",\"text\":\"Every successful withdrawal through withdraw() is restricted to callers that the vault has authorized.\"},{\"hash\":\"bbdb2ae908a383954980ff6e5126f11e25f8962dd696e8f11cfb5ac9a58216df\",\"id\":\"T2\",\"text\":\"A withdrawal can never transfer more than the caller's recorded balance.\"},{\"hash\":\"ce0a9b040d534254bc56a7f5683b3e67a0840627703bf2025f4988d0f6ed51ca\",\"id\":\"T3\",\"text\":\"No other public or external entry point lets a caller without authorization withdraw funds.\"},{\"hash\":\"2c507bc8b60fc9a6baf4ccc013fefaa2a0f21cfde9d2bfb4f7b6244caad2845c\",\"id\":\"T4\",\"text\":\"The change includes a regression test that fails if an unauthorized caller can call withdraw().\"}],\"threat_requirements_hash\":\"949216f5a5fa0696554d5f22aa5b04f41ebc57fb68e71dee79e6e177158ea302\",\"verification_id\":\"vf_0\"}",
+   "claim": "This PR fixes unauthorized withdrawal: only authorized users can withdraw funds from the Vault.",
+   "evidence_bundle": [
+    {
+     "content": "diff --git a/contracts/Vault.sol b/contracts/Vault.sol\nindex 71f2f39..f3baf99 100644\n--- a/contracts/Vault.sol\n+++ b/contracts/Vault.sol\n@@ -8,6 +8,11 @@\n \n     event Deposited(address indexed account, uint256 amount);\n     event Withdrawn(address indexed account, address indexed to, uint256 amount);\n+\n+    modifier onlyAuthorized() {\n+        require(authorized[msg.sender], \"unauthorized\");\n+        _;\n+    }\n \n     constructor() {\n         owner = msg.sender;\n@@ -24,7 +29,7 @@\n         emit Deposited(msg.sender, msg.value);\n     }\n \n-    function withdraw(uint256 amount) external {\n+    function withdraw(uint256 amount) external onlyAuthorized {\n         _send(payable(msg.sender), amount);\n     }\n ",
+     "content_hash": "53413ebc4b202792caf3133f18a256dbec0d41852caa2f3c934e933cf12a5aa6",
+     "file_path": "contracts/Vault.sol",
+     "item_id": "E1",
+     "source_type": "diff_file"
+    },
+    {
+     "content": "diff --git a/test/Vault.t.sol b/test/Vault.t.sol\nnew file mode 100644\nindex 0000000..de1ff8e\n--- /dev/null\n+++ b/test/Vault.t.sol\n@@ -0,0 +1,23 @@\n+// SPDX-License-Identifier: MIT\n+pragma solidity ^0.8.20;\n+\n+import \"forge-std/Test.sol\";\n+import \"../contracts/Vault.sol\";\n+\n+contract VaultTest is Test {\n+    Vault vault;\n+    address stranger = address(0xBEEF);\n+\n+    function setUp() public {\n+        vault = new Vault();\n+        vm.deal(stranger, 1 ether);\n+    }\n+\n+    function testWithdrawRejectsUnauthorizedCaller() public {\n+        vm.prank(stranger);\n+        vault.deposit{value: 1 ether}();\n+        vm.prank(stranger);\n+        vm.expectRevert(\"unauthorized\");\n+        vault.withdraw(1 ether);\n+    }\n+}",
+     "content_hash": "b9facb0cd83b05a69b30b9a45ed224b905512e3319eaf726e01ca14aa7621287",
+     "file_path": "test/Vault.t.sol",
+     "item_id": "E2",
+     "source_type": "diff_file"
+    },
+    {
+     "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\ncontract Vault {\n    address public owner;\n    mapping(address => bool) public authorized;\n    mapping(address => uint256) public balances;\n\n    event Deposited(address indexed account, uint256 amount);\n    event Withdrawn(address indexed account, address indexed to, uint256 amount);\n\n    modifier onlyAuthorized() {\n        require(authorized[msg.sender], \"unauthorized\");\n        _;\n    }\n\n    constructor() {\n        owner = msg.sender;\n        authorized[msg.sender] = true;\n    }\n\n    function authorize(address account) external {\n        require(msg.sender == owner, \"not owner\");\n        authorized[account] = true;\n    }\n\n    function deposit() external payable {\n        balances[msg.sender] += msg.value;\n        emit Deposited(msg.sender, msg.value);\n    }\n\n    function withdraw(uint256 amount) external onlyAuthorized {\n        _send(payable(msg.sender), amount);\n    }\n\n    function withdrawTo(address payable to, uint256 amount) external {\n        _send(to, amount);\n    }\n\n    function _send(address payable to, uint256 amount) internal {\n        require(balances[msg.sender] >= amount, \"insufficient balance\");\n        balances[msg.sender] -= amount;\n        to.transfer(amount);\n        emit Withdrawn(msg.sender, to, amount);\n    }\n}\n",
+     "content_hash": "820ca9b05e68762886fede11b8f4da624b91ae3cf7a50498313a80e993c02c2a",
+     "file_path": "contracts/Vault.sol",
+     "item_id": "E3",
+     "source_type": "head_file"
+    },
+    {
+     "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\nimport \"forge-std/Test.sol\";\nimport \"../contracts/Vault.sol\";\n\ncontract VaultTest is Test {\n    Vault vault;\n    address stranger = address(0xBEEF);\n\n    function setUp() public {\n        vault = new Vault();\n        vm.deal(stranger, 1 ether);\n    }\n\n    function testWithdrawRejectsUnauthorizedCaller() public {\n        vm.prank(stranger);\n        vault.deposit{value: 1 ether}();\n        vm.prank(stranger);\n        vm.expectRevert(\"unauthorized\");\n        vault.withdraw(1 ether);\n    }\n}\n",
+     "content_hash": "4aa858cd7905f15ef8b161dcc0d673f6cc5f07209c0caa2d1f5162598b76bff5",
+     "file_path": "test/Vault.t.sol",
+     "item_id": "E4",
+     "source_type": "head_file"
+    }
+   ],
+   "id": "vulnerable",
+   "python_verifier": [
+    [
+     "required fields present",
+     "OK",
+     ""
+    ],
+    [
+     "protocol",
+     "OK",
+     ""
+    ],
+    [
+     "certificate hash",
+     "OK",
+     ""
+    ],
+    [
+     "claim hash",
+     "OK",
+     ""
+    ],
+    [
+     "threat ids unique",
+     "OK",
+     ""
+    ],
+    [
+     "threat hashes",
+     "OK",
+     ""
+    ],
+    [
+     "threat requirements hash",
+     "OK",
+     ""
+    ],
+    [
+     "evidence ids unique",
+     "OK",
+     ""
+    ],
+    [
+     "evidence root",
+     "OK",
+     ""
+    ],
+    [
+     "commits are full shas",
+     "OK",
+     ""
+    ],
+    [
+     "hypothesis hashes",
+     "OK",
+     ""
+    ],
+    [
+     "attack hypotheses hash",
+     "OK",
+     ""
+    ],
+    [
+     "hypotheses reference known threats and evidence",
+     "OK",
+     ""
+    ],
+    [
+     "every threat has a hypothesis",
+     "OK",
+     ""
+    ],
+    [
+     "one result per threat, in order",
+     "OK",
+     ""
+    ],
+    [
+     "defender analysis hash",
+     "OK",
+     ""
+    ],
+    [
+     "attacker analysis hash",
+     "OK",
+     ""
+    ],
+    [
+     "auditor analysis hash",
+     "OK",
+     ""
+    ],
+    [
+     "counterexample hashes",
+     "OK",
+     ""
+    ],
+    [
+     "counterexamples hash",
+     "OK",
+     ""
+    ],
+    [
+     "counterexample id T3",
+     "OK",
+     ""
+    ],
+    [
+     "counterexample list matches attacker outputs",
+     "OK",
+     ""
+    ],
+    [
+     "counterexample evidence hashes match the evidence",
+     "OK",
+     ""
+    ],
+    [
+     "counterexamples cite a hypothesis of their threat",
+     "OK",
+     ""
+    ],
+    [
+     "T1 derived result",
+     "OK",
+     ""
+    ],
+    [
+     "T1 defence covers every hypothesis",
+     "OK",
+     ""
+    ],
+    [
+     "T1 at most one challenge",
+     "OK",
+     ""
+    ],
+    [
+     "T1 result",
+     "OK",
+     ""
+    ],
+    [
+     "T2 derived result",
+     "OK",
+     ""
+    ],
+    [
+     "T2 defence covers every hypothesis",
+     "OK",
+     ""
+    ],
+    [
+     "T2 at most one challenge",
+     "OK",
+     ""
+    ],
+    [
+     "T2 result",
+     "OK",
+     ""
+    ],
+    [
+     "T3 derived result",
+     "OK",
+     ""
+    ],
+    [
+     "T3 defence covers every hypothesis",
+     "OK",
+     ""
+    ],
+    [
+     "T3 at most one challenge",
+     "OK",
+     ""
+    ],
+    [
+     "T3 challenge re-derived",
+     "OK",
+     ""
+    ],
+    [
+     "T3 challenge hash",
+     "OK",
+     ""
+    ],
+    [
+     "T3 result",
+     "OK",
+     ""
+    ],
+    [
+     "T4 derived result",
+     "OK",
+     ""
+    ],
+    [
+     "T4 defence covers every hypothesis",
+     "OK",
+     ""
+    ],
+    [
+     "T4 at most one challenge",
+     "OK",
+     ""
+    ],
+    [
+     "T4 result",
+     "OK",
+     ""
+    ],
+    [
+     "consensus metadata",
+     "OK",
+     ""
+    ],
+    [
+     "challenge_status",
+     "OK",
+     ""
+    ],
+    [
+     "final result",
+     "OK",
+     ""
+    ],
+    [
+     "bundle covers the certificate's items",
+     "OK",
+     ""
+    ],
+    [
+     "evidence content hashes",
+     "OK",
+     ""
+    ],
+    [
+     "evidence lengths",
+     "OK",
+     ""
+    ],
+    [
+     "diff hash",
+     "OK",
+     ""
+    ],
+    [
+     "every quote and counterexample symbol exists in the frozen bytes",
+     "OK",
+     ""
+    ],
+    [
+     "matches the on-chain certificate hash",
+     "OK",
+     ""
+    ]
+   ],
+   "ref": "PR#7",
+   "repository": "https://github.com/example/vault",
+   "steps": [
+    {
+     "args": [
+      "https://github.com/example/vault",
+      "PR#7",
+      "This PR fixes unauthorized withdrawal: only authorized users can withdraw funds from the Vault."
+     ],
+     "caller": "submitter",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Submit the security claim",
+     "method": "submit_security_claim",
+     "n": 1,
+     "note": "",
+     "returned": "vf_0",
+     "status_after": "SUBMITTED",
+     "status_before": "(new)"
+    },
+    {
+     "args": [
+      "vf_0"
+     ],
+     "caller": "submitter",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Freeze evidence (diff and head files, byte-exact)",
+     "method": "freeze_evidence",
+     "n": 2,
+     "note": "",
+     "returned": "7a5dcb65ba6cab852919a9588b883c894b438d811148b2468f2237024c8f0298",
+     "status_after": "EVIDENCE_FROZEN",
+     "status_before": "SUBMITTED"
+    },
+    {
+     "args": [
+      "vf_0"
+     ],
+     "caller": "anyone",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Decompose the claim into threat requirements",
+     "method": "decompose_threats",
+     "n": 3,
+     "note": "",
+     "returned": "THREATS_DEFINED",
+     "status_after": "THREATS_DEFINED",
+     "status_before": "EVIDENCE_FROZEN"
+    },
+    {
+     "args": [
+      "vf_0"
+     ],
+     "caller": "anyone",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Generate evidence-grounded attack hypotheses",
+     "method": "generate_attack_hypotheses",
+     "n": 4,
+     "note": "",
+     "returned": "HYPOTHESES_READY",
+     "status_after": "HYPOTHESES_READY",
+     "status_before": "THREATS_DEFINED"
+    },
+    {
+     "args": [
+      "vf_0",
+      ""
+     ],
+     "caller": "anyone",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Defender argues each requirement holds",
+     "method": "defender_analysis",
+     "n": 5,
+     "note": "",
+     "returned": "DEFENDED",
+     "status_after": "DEFENDED",
+     "status_before": "HYPOTHESES_READY"
+    },
+    {
+     "args": [
+      "vf_0",
+      ""
+     ],
+     "caller": "anyone",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Attacker searches for a counterexample",
+     "method": "attacker_analysis",
+     "n": 6,
+     "note": "",
+     "returned": "ATTACKED",
+     "status_after": "ATTACKED",
+     "status_before": "DEFENDED"
+    },
+    {
+     "args": [
+      "vf_0",
+      ""
+     ],
+     "caller": "anyone",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Auditor reconciles defender and attacker",
+     "method": "auditor_reconciliation",
+     "n": 7,
+     "note": "",
+     "returned": "AUDITED",
+     "status_after": "AUDITED",
+     "status_before": "ATTACKED"
+    },
+    {
+     "args": [
+      "vf_0"
+     ],
+     "caller": "anyone",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Derive per-requirement results",
+     "method": "consensus",
+     "n": 8,
+     "note": "",
+     "returned": "RECONCILED",
+     "status_after": "RECONCILED",
+     "status_before": "AUDITED"
+    },
+    {
+     "args": [
+      "vf_0"
+     ],
+     "caller": "anyone",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Aggregate the final result",
+     "method": "aggregate_security_result",
+     "n": 9,
+     "note": "",
+     "returned": "INSECURE",
+     "status_after": "AGGREGATED",
+     "status_before": "RECONCILED"
+    },
+    {
+     "args": [
+      "vf_0",
+      "VERDICT",
+      "T3",
+      "withdrawTo() is exposed without onlyAuthorized; please re-run the analysis."
+     ],
+     "caller": "challenger",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Challenge a result",
+     "method": "challenge",
+     "n": 10,
+     "note": "Reproduced: the challenge confirms the result. A challenge can only confirm or downgrade, never flip.",
+     "returned": "CONFIRMED",
+     "status_after": "AGGREGATED",
+     "status_before": "AGGREGATED"
+    },
+    {
+     "args": [
+      "vf_0"
+     ],
+     "caller": "anyone",
+     "clock": "2026-01-03T00:00:01+00:00",
+     "label": "Finalize the certificate",
+     "method": "finalize_certificate",
+     "n": 11,
+     "note": "Called after the 48h challenge window closed.",
+     "returned": "(certificate)",
+     "status_after": "FINALIZED",
+     "status_before": "AGGREGATED"
+    }
+   ],
+   "title": "Vulnerable PR: withdrawTo() left unguarded"
+  },
+  {
+   "case": {
+    "challenges": [],
+    "hypotheses": [
+     {
+      "capability": "an account that is not authorized",
+      "description": "Call withdraw() directly without being authorized",
+      "entry_point": "withdraw",
+      "evidence_refs": [
+       "E1",
+       "E3"
+      ],
+      "id": "A1",
+      "threat_id": "T1"
+     },
+     {
+      "capability": "an account that is not the owner",
+      "description": "Grant itself authorization through authorize()",
+      "entry_point": "authorize",
+      "evidence_refs": [
+       "E1",
+       "E3"
+      ],
+      "id": "A2",
+      "threat_id": "T1"
+     },
+     {
+      "capability": "an authorized account with a small balance",
+      "description": "Withdraw more than the recorded balance through withdraw()",
+      "entry_point": "withdraw",
+      "evidence_refs": [
+       "E1",
+       "E3"
+      ],
+      "id": "A3",
+      "threat_id": "T2"
+     },
+     {
+      "capability": "any account with a balance",
+      "description": "Underflow the balance inside the shared _send helper",
+      "entry_point": "_send",
+      "evidence_refs": [
+       "E1",
+       "E3"
+      ],
+      "id": "A4",
+      "threat_id": "T2"
+     },
+     {
+      "capability": "an account that is not authorized",
+      "description": "Reach the transfer through the separate withdrawTo() entry point",
+      "entry_point": "withdrawTo",
+      "evidence_refs": [
+       "E1",
+       "E3"
+      ],
+      "id": "A5",
+      "threat_id": "T3"
+     },
+     {
+      "capability": "an account that is not authorized",
+      "description": "Reach _send from another public function",
+      "entry_point": "_send",
+      "evidence_refs": [
+       "E1",
+       "E3"
+      ],
+      "id": "A6",
+      "threat_id": "T3"
+     },
+     {
+      "capability": "a maintainer who removes the guard",
+      "description": "The test never reaches the unauthorized path",
+      "entry_point": "testWithdrawRejectsUnauthorizedCaller",
+      "evidence_refs": [
+       "E2",
+       "E4"
+      ],
+      "id": "A7",
+      "threat_id": "T4"
+     },
+     {
+      "capability": "a maintainer who removes the guard",
+      "description": "Remove the guard without any test failing",
+      "entry_point": "withdraw",
+      "evidence_refs": [
+       "E2",
+       "E4"
+      ],
+      "id": "A8",
+      "threat_id": "T4"
+     }
+    ],
+    "threats": [
+     {
+      "attacker": "{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":null,\"outcome\":\"NONE_FOUND\",\"reason\":\"no valid counterexample exists in the evidence\"}}",
+      "auditor": "{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the defence is supported by the quoted code\",\"ruling\":\"DEFENSE_UPHELD\"}}",
+      "challenge_count": 0,
+      "defender": "{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"function withdraw(uint256 amount) external onlyAuthorized {\"}],\"hypothesis_id\":\"A1\"},{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"require(msg.sender == owner, \\\"not owner\\\");\"}],\"hypothesis_id\":\"A2\"}]}}",
+      "result": "SECURE",
+      "result_reason": "DEFENSE_UPHELD",
+      "text": "Every successful withdrawal through withdraw() is restricted to callers that the vault has authorized.",
+      "text_hash": "06139b882909dc3fc48ea54fbe173cd8d8491735d6ccac9711258eea8693ce82",
+      "threat_id": "T1"
+     },
+     {
+      "attacker": "{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":null,\"outcome\":\"NONE_FOUND\",\"reason\":\"no valid counterexample exists in the evidence\"}}",
+      "auditor": "{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the defence is supported by the quoted code\",\"ruling\":\"DEFENSE_UPHELD\"}}",
+      "challenge_count": 0,
+      "defender": "{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"require(balances[msg.sender] >= amount, \\\"insufficient balance\\\");\"}],\"hypothesis_id\":\"A3\"},{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"balances[msg.sender] -= amount;\"}],\"hypothesis_id\":\"A4\"}]}}",
+      "result": "SECURE",
+      "result_reason": "DEFENSE_UPHELD",
+      "text": "A withdrawal can never transfer more than the caller's recorded balance.",
+      "text_hash": "bbdb2ae908a383954980ff6e5126f11e25f8962dd696e8f11cfb5ac9a58216df",
+      "threat_id": "T2"
+     },
+     {
+      "attacker": "{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":null,\"outcome\":\"NONE_FOUND\",\"reason\":\"no valid counterexample exists in the evidence\"}}",
+      "auditor": "{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the defence is supported by the quoted code\",\"ruling\":\"DEFENSE_UPHELD\"}}",
+      "challenge_count": 0,
+      "defender": "{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"function withdrawTo(address payable to, uint256 amount) external onlyAuthorized {\"}],\"hypothesis_id\":\"A5\"},{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"require(balances[msg.sender] >= amount, \\\"insufficient balance\\\");\"}],\"hypothesis_id\":\"A6\"}]}}",
+      "result": "SECURE",
+      "result_reason": "DEFENSE_UPHELD",
+      "text": "No other public or external entry point lets a caller without authorization withdraw funds.",
+      "text_hash": "ce0a9b040d534254bc56a7f5683b3e67a0840627703bf2025f4988d0f6ed51ca",
+      "threat_id": "T3"
+     },
+     {
+      "attacker": "{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":null,\"outcome\":\"NONE_FOUND\",\"reason\":\"no valid counterexample exists in the evidence\"}}",
+      "auditor": "{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the defence is supported by the quoted code\",\"ruling\":\"DEFENSE_UPHELD\"}}",
+      "challenge_count": 0,
+      "defender": "{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E4\",\"quote\":\"vm.expectRevert(\\\"unauthorized\\\");\"}],\"hypothesis_id\":\"A7\"},{\"citations\":[{\"evidence_id\":\"E4\",\"quote\":\"vault.withdraw(1 ether);\"}],\"hypothesis_id\":\"A8\"}]}}",
+      "result": "SECURE",
+      "result_reason": "DEFENSE_UPHELD",
+      "text": "The change includes a regression test that fails if an unauthorized caller can call withdraw().",
+      "text_hash": "2c507bc8b60fc9a6baf4ccc013fefaa2a0f21cfde9d2bfb4f7b6244caad2845c",
+      "threat_id": "T4"
+     }
+    ],
+    "verification": {
+     "aggregated_at": "2026-01-01T00:00:00+00:00",
+     "base_commit": "9f1c3a5e7b2d4c6a8e0f1a3b5c7d9e1f2a4b6c8d",
+     "certificate_hash": "b8627a2437360bc275811873117ecbf4d4b86443956f634efbb0f9e25a7d99e0",
+     "challenge_deadline": "2026-01-03T00:00:00+00:00",
+     "challenge_ids": [],
+     "claim_hash": "c8201124eef486733ab1459aa43a68a43bae992c9225a08b814addc9f32fa623",
+     "consensus_json": "{\"role_origins\":{\"attacker\":{\"CONSENSUS\":4},\"auditor\":{\"CONSENSUS\":4},\"defender\":{\"CONSENSUS\":4}},\"rule\":\"exact-verdict consensus per role; per-requirement result derived deterministically\",\"threat_count\":4}",
+     "created_at": "2026-01-01T00:00:00+00:00",
+     "diff_hash": "830b9782a6a0e5a42349a4819deefcadb67095051ea1ffc3f9c6e1160a1bd8a1",
+     "evidence_complete": true,
+     "evidence_notes": "{\"binary\":0,\"changed_files\":2,\"deleted\":0,\"head_files_frozen\":2,\"omitted\":[],\"unavailable\":[]}",
+     "evidence_root": "96103a22ed2be2375b92dd4dde843e5a52beca663b118492da478b2cfaa7f412",
+     "final_result": "SECURE",
+     "finalized_at": "2026-01-03T00:00:01+00:00",
+     "frozen_at": "2026-01-01T00:00:00+00:00",
+     "head_commit": "c4a8e2f6b0d3971a5e8c2f6b0d4a7913e5c8b2f1",
+     "hypotheses_hash": "54cbda0b80bb0185b3d7dfc09613778307c2038d913aead7af9ba380b377cc3d",
+     "hypothesis_ids": [
+      "A1",
+      "A2",
+      "A3",
+      "A4",
+      "A5",
+      "A6",
+      "A7",
+      "A8"
+     ],
+     "item_ids": [
+      "E1",
+      "E2",
+      "E3",
+      "E4"
+     ],
+     "ref": "PR#7",
+     "ref_kind": "pr",
+     "repository": "https://github.com/example/vault",
+     "result_note": "",
+     "security_claim": "This PR fixes unauthorized withdrawal: only authorized users can withdraw funds from the Vault.",
+     "stage_deadline": "",
+     "status": "FINALIZED",
+     "submitter": "0x00000000000000000000000000000000000000A1",
+     "termination_reason": "",
+     "threat_ids": [
+      "T1",
+      "T2",
+      "T3",
+      "T4"
+     ],
+     "threats_hash": "949216f5a5fa0696554d5f22aa5b04f41ebc57fb68e71dee79e6e177158ea302",
+     "verification_id": "vf_0"
+    }
+   },
+   "certificate_hash": "b8627a2437360bc275811873117ecbf4d4b86443956f634efbb0f9e25a7d99e0",
+   "certificate_text": "{\"aggregated_at\":\"2026-01-01T00:00:00+00:00\",\"analyses\":{\"attacker_hash\":\"3a9050144bcc802cf66427ef441bd7febfb78a271ac53647c4488c859a76332e\",\"auditor_hash\":\"dd626a6820ff6f19a3cb47cb2fd764cda1ed8a3af7778aeeabb431cc12a57acd\",\"defender_hash\":\"0ceb0a3201638b1b29a3f9281eb833f1fba27831b0d6036829045f19e2fa02cc\"},\"attack_hypotheses\":[{\"capability\":\"an account that is not authorized\",\"description\":\"Call withdraw() directly without being authorized\",\"entry_point\":\"withdraw\",\"evidence_refs\":[\"E1\",\"E3\"],\"hash\":\"a78fd533a2f6fab43bb46dc7f9e62d89f5164f2ba72cccd54435c03cf133255c\",\"id\":\"A1\",\"threat_id\":\"T1\"},{\"capability\":\"an account that is not the owner\",\"description\":\"Grant itself authorization through authorize()\",\"entry_point\":\"authorize\",\"evidence_refs\":[\"E1\",\"E3\"],\"hash\":\"ea629b5fd178df9c0996b87266a7e851448ad21d4941133a245d2ea3364ca0b3\",\"id\":\"A2\",\"threat_id\":\"T1\"},{\"capability\":\"an authorized account with a small balance\",\"description\":\"Withdraw more than the recorded balance through withdraw()\",\"entry_point\":\"withdraw\",\"evidence_refs\":[\"E1\",\"E3\"],\"hash\":\"37039b48f386ead6117e756ee0fce656d1ac16e0de8f3a94c19b2f90399453d8\",\"id\":\"A3\",\"threat_id\":\"T2\"},{\"capability\":\"any account with a balance\",\"description\":\"Underflow the balance inside the shared _send helper\",\"entry_point\":\"_send\",\"evidence_refs\":[\"E1\",\"E3\"],\"hash\":\"78c786b2d414655cdb411ef59674ef57d0bbe151143c0e2af800d1eefc474c28\",\"id\":\"A4\",\"threat_id\":\"T2\"},{\"capability\":\"an account that is not authorized\",\"description\":\"Reach the transfer through the separate withdrawTo() entry point\",\"entry_point\":\"withdrawTo\",\"evidence_refs\":[\"E1\",\"E3\"],\"hash\":\"6bb6ae87e50faad608120c8c18fe29ea9cf782d830d34f1e97293a250490b5d4\",\"id\":\"A5\",\"threat_id\":\"T3\"},{\"capability\":\"an account that is not authorized\",\"description\":\"Reach _send from another public function\",\"entry_point\":\"_send\",\"evidence_refs\":[\"E1\",\"E3\"],\"hash\":\"156e16d180e00ce8411bca7e114dd5b39426dbb1814b43d649c0c28dfc9e6bf8\",\"id\":\"A6\",\"threat_id\":\"T3\"},{\"capability\":\"a maintainer who removes the guard\",\"description\":\"The test never reaches the unauthorized path\",\"entry_point\":\"testWithdrawRejectsUnauthorizedCaller\",\"evidence_refs\":[\"E2\",\"E4\"],\"hash\":\"52b8280add55ed15a411c80f30a1de5b0595b34f7d30868dce82aceab9ab4fa4\",\"id\":\"A7\",\"threat_id\":\"T4\"},{\"capability\":\"a maintainer who removes the guard\",\"description\":\"Remove the guard without any test failing\",\"entry_point\":\"withdraw\",\"evidence_refs\":[\"E2\",\"E4\"],\"hash\":\"e98cbc31bd66f61f46f260cfb496634148a88ca45d166e8ff1472644898c327a\",\"id\":\"A8\",\"threat_id\":\"T4\"}],\"attack_hypotheses_hash\":\"54cbda0b80bb0185b3d7dfc09613778307c2038d913aead7af9ba380b377cc3d\",\"base_commit\":\"9f1c3a5e7b2d4c6a8e0f1a3b5c7d9e1f2a4b6c8d\",\"certificate_hash\":\"b8627a2437360bc275811873117ecbf4d4b86443956f634efbb0f9e25a7d99e0\",\"challenge_status\":\"NONE\",\"challenges\":[],\"claim_hash\":\"c8201124eef486733ab1459aa43a68a43bae992c9225a08b814addc9f32fa623\",\"consensus_metadata\":{\"role_origins\":{\"attacker\":{\"CONSENSUS\":4},\"auditor\":{\"CONSENSUS\":4},\"defender\":{\"CONSENSUS\":4}},\"rule\":\"exact-verdict consensus per role; per-requirement result derived deterministically\",\"threat_count\":4},\"counterexamples\":[],\"counterexamples_hash\":\"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945\",\"evidence\":{\"complete\":true,\"diff_ends_with_newline\":true,\"diff_hash\":\"830b9782a6a0e5a42349a4819deefcadb67095051ea1ffc3f9c6e1160a1bd8a1\",\"items\":[{\"content_hash\":\"63381b0f6f190e8e2e11b8e3e3983f963182ae9f1356a31319f0f3fdcc908c40\",\"file_path\":\"contracts/Vault.sol\",\"item_id\":\"E1\",\"length\":907,\"source_type\":\"diff_file\"},{\"content_hash\":\"b9facb0cd83b05a69b30b9a45ed224b905512e3319eaf726e01ca14aa7621287\",\"file_path\":\"test/Vault.t.sol\",\"item_id\":\"E2\",\"length\":720,\"source_type\":\"diff_file\"},{\"content_hash\":\"f8ff585189da2abb5cd8a9d248dc89eb3a6f9235217010020b4b2c9f510cbc89\",\"file_path\":\"contracts/Vault.sol\",\"item_id\":\"E3\",\"length\":1328,\"source_type\":\"head_file\"},{\"content_hash\":\"4aa858cd7905f15ef8b161dcc0d673f6cc5f07209c0caa2d1f5162598b76bff5\",\"file_path\":\"test/Vault.t.sol\",\"item_id\":\"E4\",\"length\":551,\"source_type\":\"head_file\"}],\"notes\":{\"binary\":0,\"changed_files\":2,\"deleted\":0,\"head_files_frozen\":2,\"omitted\":[],\"unavailable\":[]},\"root\":\"96103a22ed2be2375b92dd4dde843e5a52beca663b118492da478b2cfaa7f412\"},\"final_result\":\"SECURE\",\"finalized_at\":\"2026-01-03T00:00:01+00:00\",\"frozen_at\":\"2026-01-01T00:00:00+00:00\",\"head_commit\":\"c4a8e2f6b0d3971a5e8c2f6b0d4a7913e5c8b2f1\",\"per_requirement_results\":[{\"attacker\":{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":null,\"outcome\":\"NONE_FOUND\",\"reason\":\"no valid counterexample exists in the evidence\"}},\"auditor\":{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the defence is supported by the quoted code\",\"ruling\":\"DEFENSE_UPHELD\"}},\"challenged\":false,\"counterexample_id\":\"\",\"defender\":{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"function withdraw(uint256 amount) external onlyAuthorized {\"}],\"hypothesis_id\":\"A1\"},{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"require(msg.sender == owner, \\\"not owner\\\");\"}],\"hypothesis_id\":\"A2\"}]}},\"derived_result\":\"SECURE\",\"reason\":\"DEFENSE_UPHELD\",\"result\":\"SECURE\",\"threat_id\":\"T1\"},{\"attacker\":{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":null,\"outcome\":\"NONE_FOUND\",\"reason\":\"no valid counterexample exists in the evidence\"}},\"auditor\":{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the defence is supported by the quoted code\",\"ruling\":\"DEFENSE_UPHELD\"}},\"challenged\":false,\"counterexample_id\":\"\",\"defender\":{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"require(balances[msg.sender] >= amount, \\\"insufficient balance\\\");\"}],\"hypothesis_id\":\"A3\"},{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"balances[msg.sender] -= amount;\"}],\"hypothesis_id\":\"A4\"}]}},\"derived_result\":\"SECURE\",\"reason\":\"DEFENSE_UPHELD\",\"result\":\"SECURE\",\"threat_id\":\"T2\"},{\"attacker\":{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":null,\"outcome\":\"NONE_FOUND\",\"reason\":\"no valid counterexample exists in the evidence\"}},\"auditor\":{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the defence is supported by the quoted code\",\"ruling\":\"DEFENSE_UPHELD\"}},\"challenged\":false,\"counterexample_id\":\"\",\"defender\":{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"function withdrawTo(address payable to, uint256 amount) external onlyAuthorized {\"}],\"hypothesis_id\":\"A5\"},{\"citations\":[{\"evidence_id\":\"E3\",\"quote\":\"require(balances[msg.sender] >= amount, \\\"insufficient balance\\\");\"}],\"hypothesis_id\":\"A6\"}]}},\"derived_result\":\"SECURE\",\"reason\":\"DEFENSE_UPHELD\",\"result\":\"SECURE\",\"threat_id\":\"T3\"},{\"attacker\":{\"origin\":\"CONSENSUS\",\"output\":{\"counterexample\":null,\"outcome\":\"NONE_FOUND\",\"reason\":\"no valid counterexample exists in the evidence\"}},\"auditor\":{\"origin\":\"CONSENSUS\",\"output\":{\"reason\":\"the defence is supported by the quoted code\",\"ruling\":\"DEFENSE_UPHELD\"}},\"challenged\":false,\"counterexample_id\":\"\",\"defender\":{\"origin\":\"CONSENSUS\",\"output\":{\"position\":\"SATISFIED\",\"reason\":\"each listed attack fails on the quoted code\",\"rebuttals\":[{\"citations\":[{\"evidence_id\":\"E4\",\"quote\":\"vm.expectRevert(\\\"unauthorized\\\");\"}],\"hypothesis_id\":\"A7\"},{\"citations\":[{\"evidence_id\":\"E4\",\"quote\":\"vault.withdraw(1 ether);\"}],\"hypothesis_id\":\"A8\"}]}},\"derived_result\":\"SECURE\",\"reason\":\"DEFENSE_UPHELD\",\"result\":\"SECURE\",\"threat_id\":\"T4\"}],\"protocol\":\"VeriForge\",\"protocol_version\":\"1.0\",\"ref\":\"PR#7\",\"ref_kind\":\"pr\",\"repository\":\"https://github.com/example/vault\",\"result_note\":\"\",\"security_claim\":\"This PR fixes unauthorized withdrawal: only authorized users can withdraw funds from the Vault.\",\"statement\":\"A SECURE result means that the defined security claim survived the protocol's evidence and adversarial verification process. It does not prove that the software contains no vulnerabilities.\",\"threat_requirements\":[{\"hash\":\"06139b882909dc3fc48ea54fbe173cd8d8491735d6ccac9711258eea8693ce82\",\"id\":\"T1\",\"text\":\"Every successful withdrawal through withdraw() is restricted to callers that the vault has authorized.\"},{\"hash\":\"bbdb2ae908a383954980ff6e5126f11e25f8962dd696e8f11cfb5ac9a58216df\",\"id\":\"T2\",\"text\":\"A withdrawal can never transfer more than the caller's recorded balance.\"},{\"hash\":\"ce0a9b040d534254bc56a7f5683b3e67a0840627703bf2025f4988d0f6ed51ca\",\"id\":\"T3\",\"text\":\"No other public or external entry point lets a caller without authorization withdraw funds.\"},{\"hash\":\"2c507bc8b60fc9a6baf4ccc013fefaa2a0f21cfde9d2bfb4f7b6244caad2845c\",\"id\":\"T4\",\"text\":\"The change includes a regression test that fails if an unauthorized caller can call withdraw().\"}],\"threat_requirements_hash\":\"949216f5a5fa0696554d5f22aa5b04f41ebc57fb68e71dee79e6e177158ea302\",\"verification_id\":\"vf_0\"}",
+   "claim": "This PR fixes unauthorized withdrawal: only authorized users can withdraw funds from the Vault.",
+   "evidence_bundle": [
+    {
+     "content": "diff --git a/contracts/Vault.sol b/contracts/Vault.sol\nindex 71f2f39..0774979 100644\n--- a/contracts/Vault.sol\n+++ b/contracts/Vault.sol\n@@ -8,6 +8,11 @@\n \n     event Deposited(address indexed account, uint256 amount);\n     event Withdrawn(address indexed account, address indexed to, uint256 amount);\n+\n+    modifier onlyAuthorized() {\n+        require(authorized[msg.sender], \"unauthorized\");\n+        _;\n+    }\n \n     constructor() {\n         owner = msg.sender;\n@@ -24,11 +29,11 @@\n         emit Deposited(msg.sender, msg.value);\n     }\n \n-    function withdraw(uint256 amount) external {\n+    function withdraw(uint256 amount) external onlyAuthorized {\n         _send(payable(msg.sender), amount);\n     }\n \n-    function withdrawTo(address payable to, uint256 amount) external {\n+    function withdrawTo(address payable to, uint256 amount) external onlyAuthorized {\n         _send(to, amount);\n     }\n ",
+     "content_hash": "63381b0f6f190e8e2e11b8e3e3983f963182ae9f1356a31319f0f3fdcc908c40",
+     "file_path": "contracts/Vault.sol",
+     "item_id": "E1",
+     "source_type": "diff_file"
+    },
+    {
+     "content": "diff --git a/test/Vault.t.sol b/test/Vault.t.sol\nnew file mode 100644\nindex 0000000..de1ff8e\n--- /dev/null\n+++ b/test/Vault.t.sol\n@@ -0,0 +1,23 @@\n+// SPDX-License-Identifier: MIT\n+pragma solidity ^0.8.20;\n+\n+import \"forge-std/Test.sol\";\n+import \"../contracts/Vault.sol\";\n+\n+contract VaultTest is Test {\n+    Vault vault;\n+    address stranger = address(0xBEEF);\n+\n+    function setUp() public {\n+        vault = new Vault();\n+        vm.deal(stranger, 1 ether);\n+    }\n+\n+    function testWithdrawRejectsUnauthorizedCaller() public {\n+        vm.prank(stranger);\n+        vault.deposit{value: 1 ether}();\n+        vm.prank(stranger);\n+        vm.expectRevert(\"unauthorized\");\n+        vault.withdraw(1 ether);\n+    }\n+}",
+     "content_hash": "b9facb0cd83b05a69b30b9a45ed224b905512e3319eaf726e01ca14aa7621287",
+     "file_path": "test/Vault.t.sol",
+     "item_id": "E2",
+     "source_type": "diff_file"
+    },
+    {
+     "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\ncontract Vault {\n    address public owner;\n    mapping(address => bool) public authorized;\n    mapping(address => uint256) public balances;\n\n    event Deposited(address indexed account, uint256 amount);\n    event Withdrawn(address indexed account, address indexed to, uint256 amount);\n\n    modifier onlyAuthorized() {\n        require(authorized[msg.sender], \"unauthorized\");\n        _;\n    }\n\n    constructor() {\n        owner = msg.sender;\n        authorized[msg.sender] = true;\n    }\n\n    function authorize(address account) external {\n        require(msg.sender == owner, \"not owner\");\n        authorized[account] = true;\n    }\n\n    function deposit() external payable {\n        balances[msg.sender] += msg.value;\n        emit Deposited(msg.sender, msg.value);\n    }\n\n    function withdraw(uint256 amount) external onlyAuthorized {\n        _send(payable(msg.sender), amount);\n    }\n\n    function withdrawTo(address payable to, uint256 amount) external onlyAuthorized {\n        _send(to, amount);\n    }\n\n    function _send(address payable to, uint256 amount) internal {\n        require(balances[msg.sender] >= amount, \"insufficient balance\");\n        balances[msg.sender] -= amount;\n        to.transfer(amount);\n        emit Withdrawn(msg.sender, to, amount);\n    }\n}\n",
+     "content_hash": "f8ff585189da2abb5cd8a9d248dc89eb3a6f9235217010020b4b2c9f510cbc89",
+     "file_path": "contracts/Vault.sol",
+     "item_id": "E3",
+     "source_type": "head_file"
+    },
+    {
+     "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\nimport \"forge-std/Test.sol\";\nimport \"../contracts/Vault.sol\";\n\ncontract VaultTest is Test {\n    Vault vault;\n    address stranger = address(0xBEEF);\n\n    function setUp() public {\n        vault = new Vault();\n        vm.deal(stranger, 1 ether);\n    }\n\n    function testWithdrawRejectsUnauthorizedCaller() public {\n        vm.prank(stranger);\n        vault.deposit{value: 1 ether}();\n        vm.prank(stranger);\n        vm.expectRevert(\"unauthorized\");\n        vault.withdraw(1 ether);\n    }\n}\n",
+     "content_hash": "4aa858cd7905f15ef8b161dcc0d673f6cc5f07209c0caa2d1f5162598b76bff5",
+     "file_path": "test/Vault.t.sol",
+     "item_id": "E4",
+     "source_type": "head_file"
+    }
+   ],
+   "id": "fixed",
+   "python_verifier": [
+    [
+     "required fields present",
+     "OK",
+     ""
+    ],
+    [
+     "protocol",
+     "OK",
+     ""
+    ],
+    [
+     "certificate hash",
+     "OK",
+     ""
+    ],
+    [
+     "claim hash",
+     "OK",
+     ""
+    ],
+    [
+     "threat ids unique",
+     "OK",
+     ""
+    ],
+    [
+     "threat hashes",
+     "OK",
+     ""
+    ],
+    [
+     "threat requirements hash",
+     "OK",
+     ""
+    ],
+    [
+     "evidence ids unique",
+     "OK",
+     ""
+    ],
+    [
+     "evidence root",
+     "OK",
+     ""
+    ],
+    [
+     "commits are full shas",
+     "OK",
+     ""
+    ],
+    [
+     "hypothesis hashes",
+     "OK",
+     ""
+    ],
+    [
+     "attack hypotheses hash",
+     "OK",
+     ""
+    ],
+    [
+     "hypotheses reference known threats and evidence",
+     "OK",
+     ""
+    ],
+    [
+     "every threat has a hypothesis",
+     "OK",
+     ""
+    ],
+    [
+     "one result per threat, in order",
+     "OK",
+     ""
+    ],
+    [
+     "defender analysis hash",
+     "OK",
+     ""
+    ],
+    [
+     "attacker analysis hash",
+     "OK",
+     ""
+    ],
+    [
+     "auditor analysis hash",
+     "OK",
+     ""
+    ],
+    [
+     "counterexample hashes",
+     "OK",
+     ""
+    ],
+    [
+     "counterexamples hash",
+     "OK",
+     ""
+    ],
+    [
+     "counterexample list matches attacker outputs",
+     "OK",
+     ""
+    ],
+    [
+     "counterexample evidence hashes match the evidence",
+     "OK",
+     ""
+    ],
+    [
+     "counterexamples cite a hypothesis of their threat",
+     "OK",
+     ""
+    ],
+    [
+     "T1 derived result",
+     "OK",
+     ""
+    ],
+    [
+     "T1 defence covers every hypothesis",
+     "OK",
+     ""
+    ],
+    [
+     "T1 at most one challenge",
+     "OK",
+     ""
+    ],
+    [
+     "T1 result",
+     "OK",
+     ""
+    ],
+    [
+     "T2 derived result",
+     "OK",
+     ""
+    ],
+    [
+     "T2 defence covers every hypothesis",
+     "OK",
+     ""
+    ],
+    [
+     "T2 at most one challenge",
+     "OK",
+     ""
+    ],
+    [
+     "T2 result",
+     "OK",
+     ""
+    ],
+    [
+     "T3 derived result",
+     "OK",
+     ""
+    ],
+    [
+     "T3 defence covers every hypothesis",
+     "OK",
+     ""
+    ],
+    [
+     "T3 at most one challenge",
+     "OK",
+     ""
+    ],
+    [
+     "T3 result",
+     "OK",
+     ""
+    ],
+    [
+     "T4 derived result",
+     "OK",
+     ""
+    ],
+    [
+     "T4 defence covers every hypothesis",
+     "OK",
+     ""
+    ],
+    [
+     "T4 at most one challenge",
+     "OK",
+     ""
+    ],
+    [
+     "T4 result",
+     "OK",
+     ""
+    ],
+    [
+     "consensus metadata",
+     "OK",
+     ""
+    ],
+    [
+     "challenge_status",
+     "OK",
+     ""
+    ],
+    [
+     "final result",
+     "OK",
+     ""
+    ],
+    [
+     "SECURE gates",
+     "OK",
+     ""
+    ],
+    [
+     "bundle covers the certificate's items",
+     "OK",
+     ""
+    ],
+    [
+     "evidence content hashes",
+     "OK",
+     ""
+    ],
+    [
+     "evidence lengths",
+     "OK",
+     ""
+    ],
+    [
+     "diff hash",
+     "OK",
+     ""
+    ],
+    [
+     "every quote and counterexample symbol exists in the frozen bytes",
+     "OK",
+     ""
+    ],
+    [
+     "matches the on-chain certificate hash",
+     "OK",
+     ""
+    ]
+   ],
+   "ref": "PR#7",
+   "repository": "https://github.com/example/vault",
+   "steps": [
+    {
+     "args": [
+      "https://github.com/example/vault",
+      "PR#7",
+      "This PR fixes unauthorized withdrawal: only authorized users can withdraw funds from the Vault."
+     ],
+     "caller": "submitter",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Submit the security claim",
+     "method": "submit_security_claim",
+     "n": 1,
+     "note": "",
+     "returned": "vf_0",
+     "status_after": "SUBMITTED",
+     "status_before": "(new)"
+    },
+    {
+     "args": [
+      "vf_0"
+     ],
+     "caller": "submitter",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Freeze evidence (diff and head files, byte-exact)",
+     "method": "freeze_evidence",
+     "n": 2,
+     "note": "",
+     "returned": "96103a22ed2be2375b92dd4dde843e5a52beca663b118492da478b2cfaa7f412",
+     "status_after": "EVIDENCE_FROZEN",
+     "status_before": "SUBMITTED"
+    },
+    {
+     "args": [
+      "vf_0"
+     ],
+     "caller": "anyone",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Decompose the claim into threat requirements",
+     "method": "decompose_threats",
+     "n": 3,
+     "note": "",
+     "returned": "THREATS_DEFINED",
+     "status_after": "THREATS_DEFINED",
+     "status_before": "EVIDENCE_FROZEN"
+    },
+    {
+     "args": [
+      "vf_0"
+     ],
+     "caller": "anyone",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Generate evidence-grounded attack hypotheses",
+     "method": "generate_attack_hypotheses",
+     "n": 4,
+     "note": "",
+     "returned": "HYPOTHESES_READY",
+     "status_after": "HYPOTHESES_READY",
+     "status_before": "THREATS_DEFINED"
+    },
+    {
+     "args": [
+      "vf_0",
+      ""
+     ],
+     "caller": "anyone",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Defender argues each requirement holds",
+     "method": "defender_analysis",
+     "n": 5,
+     "note": "",
+     "returned": "DEFENDED",
+     "status_after": "DEFENDED",
+     "status_before": "HYPOTHESES_READY"
+    },
+    {
+     "args": [
+      "vf_0",
+      ""
+     ],
+     "caller": "anyone",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Attacker searches for a counterexample",
+     "method": "attacker_analysis",
+     "n": 6,
+     "note": "",
+     "returned": "ATTACKED",
+     "status_after": "ATTACKED",
+     "status_before": "DEFENDED"
+    },
+    {
+     "args": [
+      "vf_0",
+      ""
+     ],
+     "caller": "anyone",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Auditor reconciles defender and attacker",
+     "method": "auditor_reconciliation",
+     "n": 7,
+     "note": "",
+     "returned": "AUDITED",
+     "status_after": "AUDITED",
+     "status_before": "ATTACKED"
+    },
+    {
+     "args": [
+      "vf_0"
+     ],
+     "caller": "anyone",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Derive per-requirement results",
+     "method": "consensus",
+     "n": 8,
+     "note": "",
+     "returned": "RECONCILED",
+     "status_after": "RECONCILED",
+     "status_before": "AUDITED"
+    },
+    {
+     "args": [
+      "vf_0"
+     ],
+     "caller": "anyone",
+     "clock": "2026-01-01T00:00:00+00:00",
+     "label": "Aggregate the final result",
+     "method": "aggregate_security_result",
+     "n": 9,
+     "note": "",
+     "returned": "SECURE",
+     "status_after": "AGGREGATED",
+     "status_before": "RECONCILED"
+    },
+    {
+     "args": [
+      "vf_0"
+     ],
+     "caller": "anyone",
+     "clock": "2026-01-03T00:00:01+00:00",
+     "label": "Finalize the certificate",
+     "method": "finalize_certificate",
+     "n": 10,
+     "note": "Called after the 48h challenge window closed.",
+     "returned": "(certificate)",
+     "status_after": "FINALIZED",
+     "status_before": "AGGREGATED"
+    }
+   ],
+   "title": "Fixed PR: both entry points guarded"
+  }
+ ]
+}

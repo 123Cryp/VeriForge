@@ -1,0 +1,143 @@
+{
+ "attacks": [
+  {
+   "attack": "The leader submits an INSECURE counterexample that cites code which is not in the frozen evidence; one validator's model is colluding and agrees with it.",
+   "blocked": true,
+   "id": "A1",
+   "name": "Forged counterexample from a malicious leader",
+   "observed": {
+    "consensus_error": "validators rejected the leader result (0/3 agreed)",
+    "state_unchanged": true
+   },
+   "stopped_by": "consensus + deterministic"
+  },
+  {
+   "attack": "The leader reports NONE_FOUND for the unguarded withdrawTo() path so the change would look SECURE.",
+   "blocked": true,
+   "id": "A2",
+   "name": "Leader suppresses the real counterexample",
+   "observed": {
+    "consensus_error": "validators rejected the leader result (0/3 agreed)",
+    "state_unchanged": true
+   },
+   "stopped_by": "consensus"
+  },
+  {
+   "attack": "All validators' models agree on an exploit that quotes code that does not exist.",
+   "blocked": true,
+   "id": "A3",
+   "name": "Every node hallucinates the same counterexample",
+   "observed": {
+    "T1_result": "UNPROVEN",
+    "attacker_outcome": "UNSUBSTANTIATED"
+   },
+   "stopped_by": "deterministic"
+  },
+  {
+   "attack": "The claim text carries an instruction and a fake fence terminator; every model obeys and rubber-stamps SECURE.",
+   "blocked": true,
+   "id": "A4",
+   "name": "Prompt injection with fully obedient models",
+   "observed": {
+    "fence_intact": true,
+    "final_result": "UNPROVEN",
+    "notice_in_every_prompt": true
+   },
+   "stopped_by": "deterministic"
+  },
+  {
+   "attack": "After the freeze the PR head and the source files change to a fixed version; the attacker tries to re-freeze.",
+   "blocked": true,
+   "id": "A5",
+   "name": "Evidence swapped after freezing (force-push)",
+   "observed": {
+    "T3": "INSECURE",
+    "evidence_unchanged": true,
+    "refreeze_error": "invalid state: vf_0 is EVIDENCE_FROZEN, expected one of ('SUBMITTED',)"
+   },
+   "stopped_by": "deterministic"
+  },
+  {
+   "attack": "Calls stages out of order, repeats every transition, freezes as a stranger, and challenges the same threat twice.",
+   "blocked": true,
+   "id": "A6",
+   "name": "Replay, stage skipping and wrong caller",
+   "observed": {
+    "attempts": [
+     {
+      "attempt": "freeze by a stranger",
+      "rejected": true
+     },
+     {
+      "attempt": "skip to consensus",
+      "rejected": true
+     },
+     {
+      "attempt": "skip to finalize",
+      "rejected": true
+     },
+     {
+      "attempt": "repeat freeze",
+      "rejected": true
+     },
+     {
+      "attempt": "repeat defender",
+      "rejected": true
+     },
+     {
+      "attempt": "repeat consensus",
+      "rejected": true
+     },
+     {
+      "attempt": "repeat aggregation",
+      "rejected": true
+     },
+     {
+      "attempt": "finalize inside the window",
+      "rejected": true
+     },
+     {
+      "attempt": "repeat challenge",
+      "rejected": true
+     }
+    ]
+   },
+   "stopped_by": "deterministic"
+  },
+  {
+   "attack": "Nobody submits the analysis stages; stalling is used to leave the claim in limbo or hope silence reads as SECURE.",
+   "blocked": true,
+   "id": "A7",
+   "name": "Stalling to force a favourable outcome",
+   "observed": {
+    "final_result": "UNPROVEN",
+    "late_call_error": "stage deadline has passed; call expire_if_timed_out",
+    "status": "AGGREGATED"
+   },
+   "stopped_by": "deterministic"
+  },
+  {
+   "attack": "A challenger whose re-analysis genuinely finds the unguarded path tries to overwrite a SECURE result.",
+   "blocked": true,
+   "id": "A8",
+   "name": "Challenge used to flip SECURE into INSECURE",
+   "observed": {
+    "final_result": "CONFLICTING_EVIDENCE",
+    "resolution": "DOWNGRADED"
+   },
+   "stopped_by": "deterministic"
+  },
+  {
+   "attack": "Form-feed, NEL and U+2028 characters inside a file try to fake a second diff header for auth/secure.py.",
+   "blocked": true,
+   "id": "A9",
+   "name": "Diff that imitates another file's header",
+   "observed": {
+    "diff_files_recorded": [
+     "a.py"
+    ]
+   },
+   "stopped_by": "deterministic"
+  }
+ ]
+}
