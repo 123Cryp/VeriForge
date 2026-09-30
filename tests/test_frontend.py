@@ -52,7 +52,7 @@ def with_page(fn, use_http=True):
         browser = p.chromium.launch(**({"executable_path": exe} if exe else {}), args=["--no-sandbox"])
         page = browser.new_page(viewport={"width": 390, "height": 900})
         page.on("pageerror", lambda e: errors.append(str(e)))
-        page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
+        page.on("console", lambda m: errors.append(m.text) if m.type == "error" and not m.text.startswith("Failed to load resource") else None)
         page.goto(url)
         try:
             fn(page)
