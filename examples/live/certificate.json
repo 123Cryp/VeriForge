@@ -1,0 +1,566 @@
+{
+  "aggregated_at": "2026-09-29T21:00:14.999807+00:00",
+  "analyses": {
+    "attacker_hash": "f9ae383055779eb902277cbda370e4cad9056718184553a5295688c22cdc5f86",
+    "auditor_hash": "3bc91d33870de90eeea410c0f659d5560589fe78746969a0fa8ba74b9708cc6c",
+    "defender_hash": "147e533e4ac77df856bd65916b489c2bb21392d4d2d54e5f1a741ffcbdbbd8d1"
+  },
+  "attack_hypotheses": [
+    {
+      "capability": "Storage manipulation / unauthorized mapping write",
+      "description": "An attacker who can corrupt or overwrite contract storage (e.g., via a delegatecall bug in another contract) could set `authorized[attacker] = true` and then call `withdraw(uint256)` despite not being originally authorized, bypassing the `onlyAuthorized` check.",
+      "entry_point": "withdraw",
+      "evidence_refs": [
+        "E1",
+        "E2"
+      ],
+      "hash": "73901ab9abede1ab5afc6b2123a35243645811385cc934c1fa9aa3a4d47a6622",
+      "id": "A1",
+      "threat_id": "T1"
+    },
+    {
+      "capability": "Compromise of an authorized address",
+      "description": "If the attacker compromises a legitimately authorized address (e.g., by stealing its private key), they can invoke `withdraw` through that address, effectively allowing an unauthorized party to move funds.",
+      "entry_point": "withdraw",
+      "evidence_refs": [
+        "E1",
+        "E2"
+      ],
+      "hash": "c8bb0f2ab6c92101f8392418a6d39e50c3c5b096a614608cb14cd82263507f2f",
+      "id": "A2",
+      "threat_id": "T1"
+    },
+    {
+      "capability": "Unauthenticated external call",
+      "description": "The `withdrawTo(address payable to, uint256 amount)` function lacks the `onlyAuthorized` modifier, so any external caller can invoke it and transfer funds to an arbitrary address.",
+      "entry_point": "withdrawTo",
+      "evidence_refs": [
+        "E2"
+      ],
+      "hash": "6731b66417e5aac806c75c88f17f1dbb89d197d67767ab0ee25efcfbe53a1fcf",
+      "id": "A3",
+      "threat_id": "T2"
+    },
+    {
+      "capability": "Reentrancy",
+      "description": "An attacker can supply a malicious contract as the `to` parameter that, in its fallback/receive function, calls `withdrawTo` again before the first call finishes, draining additional funds if the contract\u2019s balance check does not prevent reentrancy.",
+      "entry_point": "withdrawTo",
+      "evidence_refs": [
+        "E2"
+      ],
+      "hash": "0da6a62dcd8faa28b0dfa85c3e7bc8408cbf1acaf25c035b7afa342c09927fa1",
+      "id": "A4",
+      "threat_id": "T2"
+    },
+    {
+      "capability": "Flash loan / balance manipulation",
+      "description": "Because `_send` only checks `balances[msg.sender]`, an attacker can first deposit a small amount, call `withdrawTo` to move that amount, and then use a flash\u2011loan to inflate `msg.sender` balance in a subsequent call, effectively bypassing the intended authorization.",
+      "entry_point": "withdrawTo",
+      "evidence_refs": [
+        "E2"
+      ],
+      "hash": "81fd410f49e60dde0b564377e3b08b70376c33fe9fbbd340cee6d3abcf55ee2f",
+      "id": "A5",
+      "threat_id": "T2"
+    },
+    {
+      "capability": "Unauthenticated external call",
+      "description": "The contract contains a public function (`withdrawTo`) that transfers funds without applying the `onlyAuthorized` modifier, violating the requirement that all external fund\u2011transfer functions enforce the check.",
+      "entry_point": "withdrawTo",
+      "evidence_refs": [
+        "E2"
+      ],
+      "hash": "b4ef4a7eb39e01dd4ebb4960864a2c430157a7eba371ad9fdc45fe24f2aad4fb",
+      "id": "A6",
+      "threat_id": "T3"
+    },
+    {
+      "capability": "Indirect bypass via public wrapper",
+      "description": "The internal `_send` function performs the actual transfer and is invoked by `withdrawTo`, which lacks the `onlyAuthorized` guard. Thus any caller can indirectly trigger a transfer without the required authorization check.",
+      "entry_point": "_send",
+      "evidence_refs": [
+        "E2"
+      ],
+      "hash": "0d9909b5bf0473f679a46b88a2b3ec20a835a185347ce2dad179d257a3bbc2bf",
+      "id": "A7",
+      "threat_id": "T3"
+    },
+    {
+      "capability": "Missing additional guard for balance underflow",
+      "description": "While `withdraw` uses `onlyAuthorized`, it relies on `_send` which only checks `balances[msg.sender]`. If an authorized address\u2019s balance is manipulated (e.g., via a separate contract that writes to storage), the function could be forced to transfer funds it shouldn\u2019t, indicating the check is insufficiently comprehensive.",
+      "entry_point": "withdraw",
+      "evidence_refs": [
+        "E1",
+        "E2"
+      ],
+      "hash": "3e2a5f789831ed6db2968096a19bb7bdd15aadf0967797ff53ecb33dbe57d80b",
+      "id": "A8",
+      "threat_id": "T3"
+    }
+  ],
+  "attack_hypotheses_hash": "83cb1e89b3529df66247462ca8795ffb91bf71c226f31fe70b9fac8c334743f3",
+  "base_commit": "d20e633a93ea396c4caf5e71b3878f7c6d8be98a",
+  "certificate_hash": "d68708db96516afe5821fa61c542afe9db944519f6c14527d0191bc6dce30d6c",
+  "challenge_status": "RESOLVED",
+  "challenges": [
+    {
+      "challenge_id": "C1",
+      "challenger": "0xBD767E1958928ff1CAaE1218dbCb4b2f2ada35F6",
+      "created_at": "2026-09-29T21:07:13.459439+00:00",
+      "final_result": "INSECURE",
+      "kind": "VERDICT",
+      "original_result": "INSECURE",
+      "rationale": "test challenge",
+      "reanalysis": {
+        "attacker": {
+          "origin": "CONSENSUS",
+          "output": {
+            "counterexample": {
+              "capability": "Unauthenticated external call",
+              "entry_point": "withdrawTo",
+              "evidence": [
+                {
+                  "evidence_id": "E2",
+                  "quote": "    function withdrawTo(address payable to, uint256 amount) external {\n        _send(to, amount);\n    }"
+                },
+                {
+                  "evidence_id": "E2",
+                  "quote": "    function withdraw(uint256 amount) external onlyAuthorized {\n        _send(payable(msg.sender), amount);\n    }"
+                },
+                {
+                  "evidence_id": "E2",
+                  "quote": "    modifier onlyAuthorized() {\n        require(authorized[msg.sender], \"unauthorized\");\n        _;\n    }"
+                }
+              ],
+              "hypothesis_id": "A3",
+              "id": "CE-T2",
+              "missing_protection": "The `withdrawTo` function lacks the `onlyAuthorized` modifier, so any caller (authorized or not) can invoke it and drain funds.",
+              "path": [
+                "withdrawTo",
+                "_send"
+              ],
+              "threat_id": "T2"
+            },
+            "outcome": "COUNTEREXAMPLE",
+            "reason": "The `withdrawTo` function in the head file does not have the `onlyAuthorized` modifier, unlike `withdraw` which does. Any external caller can invoke `withdrawTo` directly and transfer funds to an arbitrary address, bypassing the authorization requirement entirely."
+          }
+        },
+        "auditor": {
+          "origin": "CONSENSUS",
+          "output": {
+            "reason": "The head file (E2) clearly shows that `withdrawTo(address payable to, uint256 amount)` has no `onlyAuthorized` modifier, while `withdraw` does. Any external caller can invoke `withdrawTo` directly and transfer funds to an arbitrary address without being authorized. The `_send` function only checks that `balances[msg.sender] >= amount`, not authorization status. The security requirement that only authorized addresses can execute `withdrawTo` is demonstrably violated by the code as written.",
+            "ruling": "ATTACK_UPHELD"
+          }
+        },
+        "defender": {
+          "origin": "CONSENSUS",
+          "output": {
+            "position": "NOT_ESTABLISHED",
+            "reason": "The security requirement states that only addresses with `authorized[msg.sender] == true` can execute `withdrawTo`. However, the evidence shows that the `withdrawTo` function does not utilize the `onlyAuthorized` modifier, allowing any address with a sufficient balance to call it, regardless of their authorization status.",
+            "rebuttals": []
+          }
+        }
+      },
+      "reanalysis_hash": "aacee60dd01c60c6a098e4f894423bde9036597aa1a28dca13920dd95b377256",
+      "reanalysis_result": "INSECURE",
+      "resolution": "CONFIRMED",
+      "target": "T2",
+      "threat_id": "T2"
+    }
+  ],
+  "claim_hash": "c8201124eef486733ab1459aa43a68a43bae992c9225a08b814addc9f32fa623",
+  "consensus_metadata": {
+    "role_origins": {
+      "attacker": {
+        "CONSENSUS": 3
+      },
+      "auditor": {
+        "CONSENSUS": 3
+      },
+      "defender": {
+        "CONSENSUS": 3
+      }
+    },
+    "rule": "exact-verdict consensus per role; per-requirement result derived deterministically",
+    "threat_count": 3
+  },
+  "counterexamples": [
+    {
+      "counterexample": {
+        "capability": "Call an unprotected external function to transfer funds out without being authorized",
+        "entry_point": "withdrawTo",
+        "evidence": [
+          {
+            "evidence_id": "E2",
+            "quote": "    function withdraw(uint256 amount) external onlyAuthorized {\n        _send(payable(msg.sender), amount);\n    }"
+          },
+          {
+            "evidence_id": "E2",
+            "quote": "    function withdrawTo(address payable to, uint256 amount) external {\n        _send(to, amount);\n    }"
+          },
+          {
+            "evidence_id": "E2",
+            "quote": "    modifier onlyAuthorized() {\n        require(authorized[msg.sender], \"unauthorized\");\n        _;\n    }"
+          },
+          {
+            "evidence_id": "E2",
+            "quote": "    function _send(address payable to, uint256 amount) internal {\n        require(balances[msg.sender] >= amount, \"insufficient balance\");\n        balances[msg.sender] -= amount;\n        to.transfer(amount);\n    }"
+          }
+        ],
+        "hypothesis_id": "A1",
+        "id": "CE-T1",
+        "missing_protection": "No onlyAuthorized modifier on withdrawTo",
+        "path": [
+          "withdrawTo",
+          "_send"
+        ],
+        "threat_id": "T1"
+      },
+      "evidence_hashes": [
+        {
+          "content_hash": "21e37ee0c8fcab39125481a39c50e3ef578910862f203a835707cfb2077f4f80",
+          "evidence_id": "E2"
+        }
+      ],
+      "hash": "303a7e0656508249a2ff92419293064e4a2767715762da34c83a6c095597db42",
+      "id": "CE-T1",
+      "threat_id": "T1"
+    },
+    {
+      "counterexample": {
+        "capability": "Unauthenticated external call",
+        "entry_point": "withdrawTo",
+        "evidence": [
+          {
+            "evidence_id": "E2",
+            "quote": "function withdrawTo(address payable to, uint256 amount) external {"
+          },
+          {
+            "evidence_id": "E2",
+            "quote": "_send(to, amount);"
+          }
+        ],
+        "hypothesis_id": "A3",
+        "id": "CE-T2",
+        "missing_protection": "no onlyAuthorized modifier on withdrawTo",
+        "path": [
+          "withdrawTo",
+          "_send"
+        ],
+        "threat_id": "T2"
+      },
+      "evidence_hashes": [
+        {
+          "content_hash": "21e37ee0c8fcab39125481a39c50e3ef578910862f203a835707cfb2077f4f80",
+          "evidence_id": "E2"
+        }
+      ],
+      "hash": "4e6f5b28048dfa701f5624bee4db74c6498ee83543be791ed8c3e81a75bba5f2",
+      "id": "CE-T2",
+      "threat_id": "T2"
+    },
+    {
+      "counterexample": {
+        "capability": "Unauthenticated external call",
+        "entry_point": "withdrawTo",
+        "evidence": [
+          {
+            "evidence_id": "E2",
+            "quote": "    function withdrawTo(address payable to, uint256 amount) external {\n        _send(to, amount);\n    }"
+          },
+          {
+            "evidence_id": "E2",
+            "quote": "    modifier onlyAuthorized() {\n        require(authorized[msg.sender], \"unauthorized\");\n        _;\n    }"
+          },
+          {
+            "evidence_id": "E2",
+            "quote": "    function _send(address payable to, uint256 amount) internal {\n        require(balances[msg.sender] >= amount, \"insufficient balance\");\n        balances[msg.sender] -= amount;\n        to.transfer(amount);\n    }"
+          }
+        ],
+        "hypothesis_id": "A6",
+        "id": "CE-T3",
+        "missing_protection": "The `onlyAuthorized` modifier is absent from `withdrawTo`, allowing any external caller to transfer funds out of the Vault without an authorization check.",
+        "path": [
+          "withdrawTo",
+          "_send"
+        ],
+        "threat_id": "T3"
+      },
+      "evidence_hashes": [
+        {
+          "content_hash": "21e37ee0c8fcab39125481a39c50e3ef578910862f203a835707cfb2077f4f80",
+          "evidence_id": "E2"
+        }
+      ],
+      "hash": "049c66e55b2f21bd687af7fd0c674a9270df383dc9cf1014d4cf97458d1be893",
+      "id": "CE-T3",
+      "threat_id": "T3"
+    }
+  ],
+  "counterexamples_hash": "5c2580a82c2f2115a3d549005a1a9e06585197fe34e490a26328c7b4a1deb5ea",
+  "evidence": {
+    "complete": true,
+    "diff_ends_with_newline": true,
+    "diff_hash": "52960cf83366e45ecb741da09d183bfc081168b0d2c767a622089ee3c6936a3f",
+    "items": [
+      {
+        "content_hash": "ecf3389a8c574e7231efafc988f8ad8feead17bf185b4526f3f7c2435900cc83",
+        "file_path": "Vault.sol",
+        "item_id": "E1",
+        "length": 690,
+        "source_type": "diff_file"
+      },
+      {
+        "content_hash": "21e37ee0c8fcab39125481a39c50e3ef578910862f203a835707cfb2077f4f80",
+        "file_path": "Vault.sol",
+        "item_id": "E2",
+        "length": 928,
+        "source_type": "head_file"
+      }
+    ],
+    "notes": {
+      "binary": 0,
+      "changed_files": 1,
+      "deleted": 0,
+      "head_files_frozen": 1,
+      "omitted": [],
+      "unavailable": []
+    },
+    "root": "ca74dd06a59b29fe17ab04d2aed7becf1599cb753e66bd4ff8a07d1bc603fdad"
+  },
+  "final_result": "INSECURE",
+  "finalized_at": "2026-09-29T21:12:12.254911+00:00",
+  "frozen_at": "2026-09-29T20:42:58.354474+00:00",
+  "head_commit": "ac8491a126cbc782f348d8fe101a38ede9d7766d",
+  "per_requirement_results": [
+    {
+      "attacker": {
+        "origin": "CONSENSUS",
+        "output": {
+          "counterexample": {
+            "capability": "Call an unprotected external function to transfer funds out without being authorized",
+            "entry_point": "withdrawTo",
+            "evidence": [
+              {
+                "evidence_id": "E2",
+                "quote": "    function withdraw(uint256 amount) external onlyAuthorized {\n        _send(payable(msg.sender), amount);\n    }"
+              },
+              {
+                "evidence_id": "E2",
+                "quote": "    function withdrawTo(address payable to, uint256 amount) external {\n        _send(to, amount);\n    }"
+              },
+              {
+                "evidence_id": "E2",
+                "quote": "    modifier onlyAuthorized() {\n        require(authorized[msg.sender], \"unauthorized\");\n        _;\n    }"
+              },
+              {
+                "evidence_id": "E2",
+                "quote": "    function _send(address payable to, uint256 amount) internal {\n        require(balances[msg.sender] >= amount, \"insufficient balance\");\n        balances[msg.sender] -= amount;\n        to.transfer(amount);\n    }"
+              }
+            ],
+            "hypothesis_id": "A1",
+            "id": "CE-T1",
+            "missing_protection": "No onlyAuthorized modifier on withdrawTo",
+            "path": [
+              "withdrawTo",
+              "_send"
+            ],
+            "threat_id": "T1"
+          },
+          "outcome": "COUNTEREXAMPLE",
+          "reason": "The requirement claims only authorized addresses can successfully execute withdraw(uint256) to transfer funds out of the Vault, but the code exposes an alternate external fund-transfer entry point without the onlyAuthorized check. Any caller can call withdrawTo and transfer their balance out."
+        }
+      },
+      "auditor": {
+        "origin": "CONSENSUS",
+        "output": {
+          "reason": "Attacker's counterexample targets withdrawTo (unprotected path exists in E2), but requirement is narrowly scoped to withdraw(uint256 amount) only; code in E2 enforces onlyAuthorized on that exact function (per E1 diff). Defender claims NOT_ESTABLISHED on unrelated A2 hypothesis. No side's position is directly supported by evidence.",
+          "ruling": "INCONCLUSIVE"
+        }
+      },
+      "challenged": false,
+      "counterexample_id": "CE-T1",
+      "defender": {
+        "origin": "CONSENSUS",
+        "output": {
+          "position": "NOT_ESTABLISHED",
+          "reason": "The security requirement is not established because there is no evidence rebutting the hypothesis that an attacker could compromise an authorized address (A2). While the code implements the `onlyAuthorized` modifier correctly (rebutting A1), it does not prevent a compromised authorized address from calling `withdraw`.",
+          "rebuttals": [
+            {
+              "citations": [
+                {
+                  "evidence_id": "E1",
+                  "quote": "function withdraw(uint256 amount) external onlyAuthorized {"
+                }
+              ],
+              "hypothesis_id": "A1"
+            }
+          ]
+        }
+      },
+      "derived_result": "CONFLICTING_EVIDENCE",
+      "reason": "COUNTEREXAMPLE_NOT_UPHELD",
+      "result": "CONFLICTING_EVIDENCE",
+      "threat_id": "T1"
+    },
+    {
+      "attacker": {
+        "origin": "CONSENSUS",
+        "output": {
+          "counterexample": {
+            "capability": "Unauthenticated external call",
+            "entry_point": "withdrawTo",
+            "evidence": [
+              {
+                "evidence_id": "E2",
+                "quote": "function withdrawTo(address payable to, uint256 amount) external {"
+              },
+              {
+                "evidence_id": "E2",
+                "quote": "_send(to, amount);"
+              }
+            ],
+            "hypothesis_id": "A3",
+            "id": "CE-T2",
+            "missing_protection": "no onlyAuthorized modifier on withdrawTo",
+            "path": [
+              "withdrawTo",
+              "_send"
+            ],
+            "threat_id": "T2"
+          },
+          "outcome": "COUNTEREXAMPLE",
+          "reason": "The withdrawTo function is defined without the onlyAuthorized modifier, allowing any external caller to invoke it and transfer funds."
+        }
+      },
+      "auditor": {
+        "origin": "CONSENSUS",
+        "output": {
+          "reason": "The head file (E2) clearly shows that `withdrawTo(address payable to, uint256 amount) external` has no `onlyAuthorized` modifier, while the `withdraw` function does. Any external caller can invoke `withdrawTo` and transfer funds via `_send`, bypassing the authorization check. The attacker's counterexample is directly supported by the code.",
+          "ruling": "ATTACK_UPHELD"
+        }
+      },
+      "challenged": true,
+      "counterexample_id": "CE-T2",
+      "defender": {
+        "origin": "CONSENSUS",
+        "output": {
+          "position": "NOT_ESTABLISHED",
+          "reason": "The requirement is not satisfied because the `withdrawTo` function lacks the `onlyAuthorized` modifier, leaving it vulnerable to unauthorized access (A3). No rebuttal exists for A4 or A5 due to insufficient evidence to disprove reentrancy or flash loan/balance manipulation risks.",
+          "rebuttals": [
+            {
+              "citations": [
+                {
+                  "evidence_id": "E2",
+                  "quote": "function withdrawTo(address payable to, uint256 amount) external {"
+                }
+              ],
+              "hypothesis_id": "A3"
+            }
+          ]
+        }
+      },
+      "derived_result": "INSECURE",
+      "reason": "ATTACK_UPHELD",
+      "result": "INSECURE",
+      "threat_id": "T2"
+    },
+    {
+      "attacker": {
+        "origin": "CONSENSUS",
+        "output": {
+          "counterexample": {
+            "capability": "Unauthenticated external call",
+            "entry_point": "withdrawTo",
+            "evidence": [
+              {
+                "evidence_id": "E2",
+                "quote": "    function withdrawTo(address payable to, uint256 amount) external {\n        _send(to, amount);\n    }"
+              },
+              {
+                "evidence_id": "E2",
+                "quote": "    modifier onlyAuthorized() {\n        require(authorized[msg.sender], \"unauthorized\");\n        _;\n    }"
+              },
+              {
+                "evidence_id": "E2",
+                "quote": "    function _send(address payable to, uint256 amount) internal {\n        require(balances[msg.sender] >= amount, \"insufficient balance\");\n        balances[msg.sender] -= amount;\n        to.transfer(amount);\n    }"
+              }
+            ],
+            "hypothesis_id": "A6",
+            "id": "CE-T3",
+            "missing_protection": "The `onlyAuthorized` modifier is absent from `withdrawTo`, allowing any external caller to transfer funds out of the Vault without an authorization check.",
+            "path": [
+              "withdrawTo",
+              "_send"
+            ],
+            "threat_id": "T3"
+          },
+          "outcome": "COUNTEREXAMPLE",
+          "reason": "The function `withdrawTo` is declared `external` and transfers funds via `_send`, but it has no `onlyAuthorized` modifier. Any caller can invoke it to drain balances without authorization, directly violating T3."
+        }
+      },
+      "auditor": {
+        "origin": "CONSENSUS",
+        "output": {
+          "reason": "The evidence shows that the `withdrawTo` function is declared as `external` and lacks the `onlyAuthorized` modifier. The function directly calls `_send`, which transfers funds out of the Vault. Since there is no authorization check on `msg.sender` in `withdrawTo`, any external caller can invoke it to transfer funds without restriction, directly violating the security requirement. The attacker's counterexample is fully supported by the code.",
+          "ruling": "ATTACK_UPHELD"
+        }
+      },
+      "challenged": false,
+      "counterexample_id": "CE-T3",
+      "defender": {
+        "origin": "CONSENSUS",
+        "output": {
+          "position": "NOT_ESTABLISHED",
+          "reason": "The requirement is not satisfied because the `withdrawTo` function lacks the `onlyAuthorized` modifier, and no rebuttal exists for hypotheses A6 and A7. Hypothesis A8 is rebutted but does not alone satisfy the requirement.",
+          "rebuttals": [
+            {
+              "citations": [
+                {
+                  "evidence_id": "E2",
+                  "quote": "function withdraw(uint256 amount) external onlyAuthorized {"
+                },
+                {
+                  "evidence_id": "E2",
+                  "quote": "require(balances[msg.sender] >= amount, \"insufficient balance\");"
+                }
+              ],
+              "hypothesis_id": "A8"
+            }
+          ]
+        }
+      },
+      "derived_result": "INSECURE",
+      "reason": "ATTACK_UPHELD",
+      "result": "INSECURE",
+      "threat_id": "T3"
+    }
+  ],
+  "protocol": "VeriForge",
+  "protocol_version": "1.0",
+  "ref": "PR#1",
+  "ref_kind": "pr",
+  "repository": "https://github.com/123Cryp/vault-test",
+  "result_note": "",
+  "security_claim": "This PR fixes unauthorized withdrawal: only authorized users can withdraw funds from the Vault.",
+  "statement": "A SECURE result means that the defined security claim survived the protocol's evidence and adversarial verification process. It does not prove that the software contains no vulnerabilities.",
+  "threat_requirements": [
+    {
+      "hash": "910b3c98f6e59f0a165e62763c9f46491fbe1cdee2e31f19ade612bb73c3336c",
+      "id": "T1",
+      "text": "Only addresses with `authorized[msg.sender] == true` can successfully execute `withdraw(uint256 amount)` to transfer funds out of the Vault."
+    },
+    {
+      "hash": "b70b3598cf5fd4a3961e5c3251c349fd78cfd40a4822a5d572d8413e36dc3274",
+      "id": "T2",
+      "text": "Only addresses with `authorized[msg.sender] == true` can successfully execute `withdrawTo(address payable to, uint256 amount)` to transfer funds out of the Vault."
+    },
+    {
+      "hash": "4ee05e053b3b9a911f759ca0ab1558c70258ea9b158c408b9f792c09e129d1a0",
+      "id": "T3",
+      "text": "Every external or public function in the Vault that transfers funds out of the Vault must enforce the `onlyAuthorized` check on `msg.sender`."
+    }
+  ],
+  "threat_requirements_hash": "fa5c8bf6c98815e95bac93bd326ea062e57aeb6fd0ff394f68cf0a7e6b82a0eb",
+  "verification_id": "vf_0"
+}

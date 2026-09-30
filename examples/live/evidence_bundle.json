@@ -1,0 +1,16 @@
+[
+  {
+    "content": "diff --git a/Vault.sol b/Vault.sol\nindex 07a65f8..1da3edd 100644\n--- a/Vault.sol\n+++ b/Vault.sol\n@@ -6,6 +6,11 @@ contract Vault {\n     mapping(address => bool) public authorized;\n     mapping(address => uint256) public balances;\n \n+    modifier onlyAuthorized() {\n+        require(authorized[msg.sender], \"unauthorized\");\n+        _;\n+    }\n+\n     constructor() {\n         owner = msg.sender;\n         authorized[msg.sender] = true;\n@@ -15,7 +20,7 @@ contract Vault {\n         balances[msg.sender] += msg.value;\n     }\n \n-    function withdraw(uint256 amount) external {\n+    function withdraw(uint256 amount) external onlyAuthorized {\n         _send(payable(msg.sender), amount);\n     }\n ",
+    "content_hash": "ecf3389a8c574e7231efafc988f8ad8feead17bf185b4526f3f7c2435900cc83",
+    "file_path": "Vault.sol",
+    "item_id": "E1",
+    "source_type": "diff_file"
+  },
+  {
+    "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\ncontract Vault {\n    address public owner;\n    mapping(address => bool) public authorized;\n    mapping(address => uint256) public balances;\n\n    modifier onlyAuthorized() {\n        require(authorized[msg.sender], \"unauthorized\");\n        _;\n    }\n\n    constructor() {\n        owner = msg.sender;\n        authorized[msg.sender] = true;\n    }\n\n    function deposit() external payable {\n        balances[msg.sender] += msg.value;\n    }\n\n    function withdraw(uint256 amount) external onlyAuthorized {\n        _send(payable(msg.sender), amount);\n    }\n\n    function withdrawTo(address payable to, uint256 amount) external {\n        _send(to, amount);\n    }\n\n    function _send(address payable to, uint256 amount) internal {\n        require(balances[msg.sender] >= amount, \"insufficient balance\");\n        balances[msg.sender] -= amount;\n        to.transfer(amount);\n    }\n}\n",
+    "content_hash": "21e37ee0c8fcab39125481a39c50e3ef578910862f203a835707cfb2077f4f80",
+    "file_path": "Vault.sol",
+    "item_id": "E2",
+    "source_type": "head_file"
+  }
+]
