@@ -1,5 +1,5 @@
 diff --git a/contracts/Vault.sol b/contracts/Vault.sol
-index 71f2f39..f3baf99 100644
+index 71f2f39..0774979 100644
 --- a/contracts/Vault.sol
 +++ b/contracts/Vault.sol
 @@ -8,6 +8,11 @@
@@ -14,13 +14,18 @@ index 71f2f39..f3baf99 100644
  
      constructor() {
          owner = msg.sender;
-@@ -24,7 +29,7 @@
+@@ -24,11 +29,11 @@
          emit Deposited(msg.sender, msg.value);
      }
  
 -    function withdraw(uint256 amount) external {
 +    function withdraw(uint256 amount) external onlyAuthorized {
          _send(payable(msg.sender), amount);
+     }
+ 
+-    function withdrawTo(address payable to, uint256 amount) external {
++    function withdrawTo(address payable to, uint256 amount) external onlyAuthorized {
+         _send(to, amount);
      }
  
 diff --git a/test/Vault.t.sol b/test/Vault.t.sol
