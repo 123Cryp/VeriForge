@@ -261,8 +261,18 @@
     var c = await liveClient();
     return toPlain(await c.readContract({ address: LIVE.address, functionName: method, args: args || [] }));
   }
+  async function useTempAccount(log) {
+    await liveClient();
+    var acct = LIVE.mod.createAccount(LIVE.mod.generatePrivateKey());
+    LIVE.account = acct.address;
+    LIVE.write = LIVE.mod.createClient({ chain: LIVE.chains.studionet, account: acct });
+    var w = document.getElementById("walletstatus");
+    if (w) w.textContent = "temporary Studio account " + acct.address;
+    if (log) log("Using a temporary in-page Studio account " + acct.address + " (no wallet needed; it is lost on reload).");
+    return acct.address;
+  }
   async function liveWrite(method, args, log) {
-    if (!LIVE.write) throw new Error("connect a wallet first");
+    if (!LIVE.write) await useTempAccount(log);
     if (LIVE.busy) throw new Error("a transaction is already in progress");
     LIVE.busy = true;
     try {
@@ -286,9 +296,9 @@
     function log(s) { logBox.textContent += s + "\n"; logBox.scrollTop = logBox.scrollHeight; }
     var addr = el("input", { id: "addr", placeholder: "Deployed VeriForge contract address (0x…)", value: LIVE.address });
     var list = el("div", { id: "livelist" }), detail = el("div", { id: "livedetail" });
-    var wallet = el("span", { class: "muted", id: "walletstatus" }, LIVE.account ? LIVE.account : "no wallet connected");
+    var wallet = el("span", { class: "muted", id: "walletstatus" }, LIVE.account ? LIVE.account : "no account yet: one is created automatically on first submit");
     view.appendChild(panel(el("h2", {}, "Live mode (GenLayer Studio)"),
-      el("p", { class: "notice muted" }, "This mode talks to a deployed contract through genlayer-js (loaded on demand). The contract itself was run end to end on GenLayer Studio (see examples/live/ and docs/FINAL_SECURITY_REVIEW.md), but this page’s Live tab is only tested without a network. The recorded demo and the verifier work without it."),
+      el("p", { class: "notice muted" }, "This mode talks to a deployed contract through genlayer-js (loaded on demand). The contract itself was run end to end on GenLayer Studio (see examples/live/ and docs/FINAL_SECURITY_REVIEW.md), but this page’s Live tab is only tested without a network. Transactions are signed by a temporary Studio account created in the page, so no wallet or nonce setup is needed. An injected wallet can still be used but its nonce must match Studio. The recorded demo and the verifier work without it."),
       addr, el("p", {}),
       el("div", { class: "row" },
         el("button", { class: "btn primary", id: "loadlist", onclick: async function () {
@@ -301,6 +311,9 @@
             }));
           } catch (e) { log("read failed: " + (e.message || e)); }
         } }, "Load verifications"),
+        el("button", { class: "btn", id: "tempacct", onclick: async function () {
+          try { await useTempAccount(log); } catch (e) { log("could not create account: " + (e.message || e)); }
+        } }, "Use temporary Studio account"),
         el("button", { class: "btn", id: "connect", onclick: async function () {
           if (!window.ethereum) { log("No injected wallet found."); return; }
           try {
@@ -310,7 +323,7 @@
             LIVE.write = LIVE.mod.createClient({ chain: LIVE.chains.studionet, account: LIVE.account });
             wallet.textContent = LIVE.account;
           } catch (e) { log("wallet connection failed: " + (e.message || e)); }
-        } }, "Connect wallet"), wallet)));
+        } }, "Connect wallet (advanced)"), wallet)));
     var form = {
       repo: el("input", { id: "f-repo", placeholder: "https://github.com/owner/repo" }),
       ref: el("input", { id: "f-ref", placeholder: "PR#7 or a full 40-hex commit sha" }),
