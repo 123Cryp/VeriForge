@@ -277,7 +277,15 @@
     LIVE.busy = true;
     try {
       log("→ " + method + "(" + JSON.stringify(args) + ")");
-      var hash = await LIVE.write.writeContract({ address: LIVE.address, functionName: method, args: args });
+      var hash;
+      try { hash = await LIVE.write.writeContract({ address: LIVE.address, functionName: method, args: args }); }
+      catch (e) {
+        if (/nonce/i.test(String(e && (e.message || e)))) {
+          LIVE.write = null;
+          throw new Error("wallet nonce does not match Studio. Switch the wallet to the GenLayer Studio network, or press Submit again to use a temporary Studio account. (" + (e.message || e) + ")");
+        }
+        throw e;
+      }
       log("  tx " + hash + " — waiting for consensus (LLM stages can take minutes)…");
       var receipt = toPlain(await LIVE.write.waitForTransactionReceipt({ hash: hash, status: "ACCEPTED", interval: 5000, retries: 120 }));
       var res = receipt && receipt.consensus_data && receipt.consensus_data.leader_receipt && receipt.consensus_data.leader_receipt[0] && receipt.consensus_data.leader_receipt[0].execution_result;
@@ -306,9 +314,9 @@
           if (!/^0x[0-9a-fA-F]{40}$/.test(LIVE.address)) { log("Enter a valid contract address."); return; }
           try {
             var ids = await liveRead("list_verifications", [0, 20]);
-            list.replaceChildren(el("h3", {}, "Verifications (" + ids.length + " newest)"), ids.map(function (id) {
+            list.replaceChildren.apply(list, [el("h3", {}, "Verifications (" + ids.length + " newest)")].concat(ids.map(function (id) {
               return el("button", { class: "btn", style: "margin:3px", onclick: function () { open(id); } }, id);
-            }));
+            })));
           } catch (e) { log("read failed: " + (e.message || e)); }
         } }, "Load verifications"),
         el("button", { class: "btn", id: "tempacct", onclick: async function () {
@@ -321,6 +329,8 @@
             await liveClient();
             LIVE.account = accounts[0];
             LIVE.write = LIVE.mod.createClient({ chain: LIVE.chains.studionet, account: LIVE.account });
+            try { await LIVE.write.connect("studionet"); log("Wallet switched to the GenLayer Studio network."); }
+            catch (e2) { log("Could not switch the wallet to Studio (" + (e2.message || e2) + "). Falling back to a temporary Studio account."); await useTempAccount(log); return; }
             wallet.textContent = LIVE.account;
           } catch (e) { log("wallet connection failed: " + (e.message || e)); }
         } }, "Connect wallet (advanced)"), wallet)));

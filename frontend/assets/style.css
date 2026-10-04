@@ -71,3 +71,6 @@ td.wrap { word-break: break-word; min-width: 120px; }
 .step .mono { white-space: nowrap; }
 select { max-width: 100%; }
 @media (max-width: 600px) { #scenario { width: 100%; } }
+
+html, body { overflow-x: hidden; max-width: 100%; }
+p, .muted, .notice, h1, h2, h3 { overflow-wrap: anywhere; }
