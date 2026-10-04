@@ -261,6 +261,16 @@
     var c = await liveClient();
     return toPlain(await c.readContract({ address: LIVE.address, functionName: method, args: args || [] }));
   }
+  async function switchWalletChain() {
+    var c = LIVE.chains.studionet;
+    var hex = "0x" + Number(c.id).toString(16);
+    var rpc = (c.rpcUrls && c.rpcUrls.default && c.rpcUrls.default.http) || [];
+    try { await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: hex }] }); return; }
+    catch (e) { /* chain unknown to the wallet: add it */ }
+    await window.ethereum.request({ method: "wallet_addEthereumChain", params: [{
+      chainId: hex, chainName: c.name || "GenLayer Studio", rpcUrls: rpc,
+      nativeCurrency: c.nativeCurrency || { name: "GEN", symbol: "GEN", decimals: 18 } }] });
+  }
   async function useTempAccount(log) {
     await liveClient();
     var acct = LIVE.mod.createAccount(LIVE.mod.generatePrivateKey());
@@ -330,7 +340,10 @@
             LIVE.account = accounts[0];
             LIVE.write = LIVE.mod.createClient({ chain: LIVE.chains.studionet, account: LIVE.account });
             try { await LIVE.write.connect("studionet"); log("Wallet switched to the GenLayer Studio network."); }
-            catch (e2) { log("Could not switch the wallet to Studio (" + (e2.message || e2) + "). Falling back to a temporary Studio account."); await useTempAccount(log); return; }
+            catch (e2) {
+              try { await switchWalletChain(); log("Wallet switched to the GenLayer Studio network."); }
+              catch (e3) { log("Could not switch the wallet to Studio (" + (e3.message || e3) + "). Falling back to a temporary Studio account."); await useTempAccount(log); return; }
+            }
             wallet.textContent = LIVE.account;
           } catch (e) { log("wallet connection failed: " + (e.message || e)); }
         } }, "Connect wallet (advanced)"), wallet)));
