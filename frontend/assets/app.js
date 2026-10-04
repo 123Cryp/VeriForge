@@ -271,13 +271,20 @@
       chainId: hex, chainName: c.name || "GenLayer Studio", rpcUrls: rpc,
       nativeCurrency: c.nativeCurrency || { name: "GEN", symbol: "GEN", decimals: 18 } }] });
   }
+  function markAccount(kind, addr) {
+    var short = addr.slice(0, 6) + "…" + addr.slice(-4);
+    var w = document.getElementById("walletstatus");
+    var c = document.getElementById("connect"), t = document.getElementById("tempacct");
+    if (w) { w.textContent = (kind === "wallet" ? "● Wallet connected: " : "● Temporary account active: ") + addr; w.className = "connected"; }
+    if (c) { c.textContent = kind === "wallet" ? "Wallet connected ✓ " + short : "Connect wallet (advanced)"; c.classList.toggle("active", kind === "wallet"); }
+    if (t) { t.textContent = kind === "temp" ? "Temporary account ✓ " + short : "Use temporary Studio account"; t.classList.toggle("active", kind === "temp"); }
+  }
   async function useTempAccount(log) {
     await liveClient();
     var acct = LIVE.mod.createAccount(LIVE.mod.generatePrivateKey());
     LIVE.account = acct.address;
     LIVE.write = LIVE.mod.createClient({ chain: LIVE.chains.studionet, account: acct });
-    var w = document.getElementById("walletstatus");
-    if (w) w.textContent = "temporary Studio account " + acct.address;
+    markAccount("temp", acct.address);
     if (log) log("Using a temporary in-page Studio account " + acct.address + " (no wallet needed; it is lost on reload).");
     return acct.address;
   }
@@ -344,7 +351,7 @@
               try { await switchWalletChain(); log("Wallet switched to the GenLayer Studio network."); }
               catch (e3) { log("Could not switch the wallet to Studio (" + (e3.message || e3) + "). Falling back to a temporary Studio account."); await useTempAccount(log); return; }
             }
-            wallet.textContent = LIVE.account;
+            markAccount("wallet", LIVE.account);
           } catch (e) { log("wallet connection failed: " + (e.message || e)); }
         } }, "Connect wallet (advanced)"), wallet)));
     var form = {

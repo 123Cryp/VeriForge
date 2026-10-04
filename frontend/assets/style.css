@@ -74,3 +74,6 @@ select { max-width: 100%; }
 
 html, body { overflow-x: hidden; max-width: 100%; }
 p, .muted, .notice, h1, h2, h3 { overflow-wrap: anywhere; }
+
+button.btn.active { border-color: #3ddc97; color: #3ddc97; box-shadow: 0 0 14px rgba(61,220,151,.35); }
+#walletstatus.connected { color: #3ddc97; }
