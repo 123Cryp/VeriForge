@@ -288,6 +288,15 @@ def _():
     run(go)
 
 
+@test("an empty submit form sends nothing")
+def _():
+    def go(page):
+        page.click("#submitclaim")
+        page.wait_for_function("document.getElementById('livelog').innerText.includes('Fill in')")
+        assert mock(page, "__MOCK.writes.length") == 0
+    run(go)
+
+
 @test("wallet connect falls back to a temporary account when the network switch is refused")
 def _():
     def go(page):
