@@ -20,6 +20,7 @@ STEPS = [
     ("adversarial", [PY, "tests/test_adversarial.py"], {}),
     ("certificate (python + js)", [PY, "tests/test_certificate.py"], {}),
     ("frontend (chromium)", [PY, "tests/test_frontend.py"], {}),
+    ("frontend live tab (chromium, mocked genlayer-js)", [PY, "tests/test_frontend_live.py"], {}),
     ("fuzz", [PY, "tests/test_fuzz.py"], {}),
     ("unit on deploy artifact", [PY, "tests/test_veriforge.py"], {"VF_MODULE": "veriforge_deploy"}),
     ("adversarial on deploy artifact", [PY, "tests/test_adversarial.py"], {"VF_MODULE": "veriforge_deploy"}),
