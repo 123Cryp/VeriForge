@@ -302,7 +302,7 @@
   function renderLive(view) {
     var logBox = el("pre", { id: "livelog" }, "");
     function log(s) { logBox.textContent += s + "\n"; logBox.scrollTop = logBox.scrollHeight; }
-    var addr = el("input", { id: "addr", placeholder: "Deployed VeriForge contract address (0x…)", value: LIVE.address });
+    var addr = el("input", { id: "addr", placeholder: "Deployed VeriForge contract address (0x…)", value: LIVE.address || (window.VF_LIVE_EXAMPLE && window.VF_LIVE_EXAMPLE.contract) || "" });
     var list = el("div", { id: "livelist" }), detail = el("div", { id: "livedetail" });
     var wallet = el("span", { class: "muted", id: "walletstatus" }, LIVE.account ? LIVE.account : "no account yet: one is created automatically on first submit");
     view.appendChild(panel(el("h2", {}, "Live mode (GenLayer Studio)"),
@@ -341,6 +341,8 @@
     };
     view.appendChild(panel(el("h3", {}, "Submit a security claim"), form.repo, el("p", {}), form.ref, el("p", {}), form.claim, el("p", {}),
       el("button", { class: "btn primary", id: "submitclaim", onclick: async function () {
+        LIVE.address = addr.value.trim();
+        if (!/^0x[0-9a-fA-F]{40}$/.test(LIVE.address)) { log("Enter a valid contract address above first."); return; }
         try { await liveWrite("submit_security_claim", [form.repo.value.trim(), form.ref.value.trim(), form.claim.value.trim()], log); log("Reload the list to see the new verification."); }
         catch (e) { log("failed: " + (e.message || e)); }
       } }, "Submit")));
