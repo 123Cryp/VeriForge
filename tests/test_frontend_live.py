@@ -154,7 +154,7 @@ def _():
         w = mock(page, "__MOCK.writes[0]")
         assert w["functionName"] == "submit_security_claim" and w["args"] == ["https://github.com/a/b", "PR#1", "a sufficiently long claim text"]
         assert w["address"] == ADDR and w["account"]["address"].startswith("0x")
-        assert "temporary Studio account" in page.inner_text("#walletstatus")
+        assert "Temporary account active" in page.inner_text("#walletstatus")
     run(go)
 
 
@@ -268,6 +268,9 @@ def _():
         page.click("#connect")
         page.wait_for_function("document.getElementById('livelog').innerText.includes('switched')")
         assert mock(page, "__MOCK.connected") == "studionet"
+        page.wait_for_function("document.getElementById('walletstatus').innerText.includes('Wallet connected')")
+        assert "Wallet connected" in page.inner_text("#connect")
+        assert page.locator("#connect.active").count() == 1
         fill_form(page); page.click("#submitclaim")
         page.wait_for_function("__MOCK.writes.length === 1")
         assert mock(page, "__MOCK.writes[0].account") == "0x1111111111111111111111111111111111111111"
@@ -302,7 +305,7 @@ def _():
     def go(page):
         mock(page, "(window.ethereum = {request: async (a) => { if (a.method.startsWith('wallet_')) throw new Error('unsupported'); return ['0x1111111111111111111111111111111111111111']; }}, __MOCK.connectFails = true)")
         page.click("#connect")
-        page.wait_for_function("document.getElementById('walletstatus').innerText.includes('temporary')")
+        page.wait_for_function("document.getElementById('walletstatus').innerText.includes('Temporary')")
         assert "Falling back" in page.inner_text("#livelog")
     run(go)
 
