@@ -32,6 +32,8 @@ jobs:
         run: python3 tests/test_certificate.py
       - name: Frontend tests (headless Chromium)
         run: python3 tests/test_frontend.py
+      - name: Frontend tests (headless Chromium) (live tab, mocked)
+        run: python3 tests/test_frontend_live.py
       - name: Fuzz
         run: python3 tests/test_fuzz.py
       - name: Mutation tests
