@@ -274,10 +274,24 @@ def _():
     run(go)
 
 
+@test("wallet without the GenLayer snap is switched with wallet_addEthereumChain and signs itself")
+def _():
+    def go(page):
+        mock(page, "(window.__calls = [], window.ethereum = {request: async (a) => { window.__calls.push(a.method); if (a.method === 'wallet_switchEthereumChain') throw new Error('unknown chain'); return ['0x1111111111111111111111111111111111111111']; }}, __MOCK.connectFails = true)")
+        page.click("#connect")
+        page.wait_for_function("document.getElementById('livelog').innerText.includes('switched')")
+        assert mock(page, "window.__calls.includes('wallet_addEthereumChain')")
+        assert "Falling back" not in page.inner_text("#livelog")
+        fill_form(page); page.click("#submitclaim")
+        page.wait_for_function("__MOCK.writes.length === 1")
+        assert mock(page, "__MOCK.writes[0].account") == "0x1111111111111111111111111111111111111111"
+    run(go)
+
+
 @test("wallet connect falls back to a temporary account when the network switch is refused")
 def _():
     def go(page):
-        mock(page, "(window.ethereum = {request: async () => ['0x1111111111111111111111111111111111111111']}, __MOCK.connectFails = true)")
+        mock(page, "(window.ethereum = {request: async (a) => { if (a.method.startsWith('wallet_')) throw new Error('unsupported'); return ['0x1111111111111111111111111111111111111111']; }}, __MOCK.connectFails = true)")
         page.click("#connect")
         page.wait_for_function("document.getElementById('walletstatus').innerText.includes('temporary')")
         assert "Falling back" in page.inner_text("#livelog")
