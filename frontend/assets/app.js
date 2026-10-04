@@ -356,6 +356,7 @@
       el("button", { class: "btn primary", id: "submitclaim", onclick: async function () {
         LIVE.address = addr.value.trim();
         if (!/^0x[0-9a-fA-F]{40}$/.test(LIVE.address)) { log("Enter a valid contract address above first."); return; }
+        if (!form.repo.value.trim() || !form.ref.value.trim() || !form.claim.value.trim()) { log("Fill in the repository, the ref and the claim before submitting."); return; }
         try { await liveWrite("submit_security_claim", [form.repo.value.trim(), form.ref.value.trim(), form.claim.value.trim()], log); log("Reload the list to see the new verification."); }
         catch (e) { log("failed: " + (e.message || e)); }
       } }, "Submit")));
