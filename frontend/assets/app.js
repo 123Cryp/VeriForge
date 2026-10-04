@@ -323,7 +323,7 @@
     var list = el("div", { id: "livelist" }), detail = el("div", { id: "livedetail" });
     var wallet = el("span", { class: "muted", id: "walletstatus" }, LIVE.account ? LIVE.account : "no account yet: one is created automatically on first submit");
     view.appendChild(panel(el("h2", {}, "Live mode (GenLayer Studio)"),
-      el("p", { class: "notice muted" }, "This mode talks to a deployed contract through genlayer-js (loaded on demand). The contract itself was run end to end on GenLayer Studio (see examples/live/ and docs/FINAL_SECURITY_REVIEW.md), and this page’s Live tab was used against it from a browser (submit, list, open, verify) and is covered by a mocked-network test suite. Transactions are signed by a temporary Studio account created in the page, so no wallet or nonce setup is needed. An injected wallet can still be used but its nonce must match Studio. The recorded demo and the verifier work without it."),
+      el("p", { class: "notice muted" }, "This mode talks to a deployed contract through genlayer-js (loaded on demand). The contract itself was run end to end on GenLayer Studio (see examples/live/ and docs/FINAL_SECURITY_REVIEW.md), and this page’s Live tab was used against it from a browser with a connected wallet (submit, every stage, finalize, verify) and is covered by a mocked-network test suite. Transactions are signed by your connected wallet, with the GenLayer Studio network added to it automatically, or, if no wallet is connected, by a temporary Studio account created in the page. The recorded demo and the verifier work without any network."),
       addr, el("p", {}),
       el("div", { class: "row" },
         el("button", { class: "btn primary", id: "loadlist", onclick: async function () {
