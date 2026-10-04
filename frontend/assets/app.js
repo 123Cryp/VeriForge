@@ -272,9 +272,9 @@
     return acct.address;
   }
   async function liveWrite(method, args, log) {
-    if (!LIVE.write) await useTempAccount(log);
     if (LIVE.busy) throw new Error("a transaction is already in progress");
     LIVE.busy = true;
+    try { if (!LIVE.write) await useTempAccount(log); } catch (e0) { LIVE.busy = false; throw e0; }
     try {
       log("→ " + method + "(" + JSON.stringify(args) + ")");
       var hash;
