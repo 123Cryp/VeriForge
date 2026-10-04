@@ -23,7 +23,7 @@ VeriForge asks one narrow question: **does a specific security claim about a spe
 ```
 contracts/   veriforge.py (source), veriforge_deploy.py (generated)
 frontend/    index.html, assets/ (app.js, verify.js, style.css, recorded demo data)
-tests/       test_veriforge, test_adversarial, test_certificate, test_frontend, test_fuzz,
+tests/       test_veriforge, test_adversarial, test_certificate, test_frontend, test_frontend_live, test_fuzz,
              mutation_test, genlayer_stub, harness, scenario, attacks, fixtures/
 tools/       build_deploy.py, build_short_window.py, verify_certificate.py, run_demo.py,
              security_demo.py, make_fixtures.py, run_all.py
@@ -48,6 +48,7 @@ python3 tests/test_veriforge.py               # unit
 python3 tests/test_adversarial.py
 python3 tests/test_certificate.py
 python3 tests/test_frontend.py
+python3 tests/test_frontend_live.py
 FUZZ_SEED=7 FUZZ_RUNS=2000 python3 tests/test_fuzz.py
 python3 tests/mutation_test.py
 VF_MODULE=veriforge_deploy python3 tests/test_veriforge.py     # any suite against the artifact

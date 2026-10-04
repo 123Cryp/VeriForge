@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.1 - frontend fixes after steward review
+
+- Live tab: transactions are signed by a temporary in-page Studio account by default (the browser-wallet path failed with NonceTooHigh because the wallet tracked a different network); "Connect wallet" now switches the wallet to Studio and falls back to the temporary account.
+- Live tab: submit reads the contract address from the field (it was empty after a reload), the address is prefilled, the list renders real buttons, double submits are rejected.
+- Dark "robot" theme, logo, GitHub Pages workflow, cache-busting asset URLs, "Load live Studio certificate" button.
+- New tests/test_frontend_live.py: the whole Live tab against a mocked genlayer-js (16 tests).
+
 ## 1.1.0
 
 First release verified end to end on GenLayer Studio: see `examples/live/` and `docs/FINAL_SECURITY_REVIEW.md`.
