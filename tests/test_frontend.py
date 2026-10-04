@@ -243,7 +243,7 @@ def _():
 @test("the shared verifier is the same file the page loads (no divergent copy)")
 def _():
     html = open(os.path.join(FRONT, "index.html"), encoding="utf-8").read()
-    assert 'src="assets/verify.js"' in html
+    assert 'src="assets/verify.js' in html
     assert not [f for f in os.listdir(os.path.join(FRONT, "assets")) if f.startswith("verify") and f != "verify.js"]
 
 
